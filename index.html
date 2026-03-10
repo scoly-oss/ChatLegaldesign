@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat LegalDesign — Générateur d'infographies</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <style>
+    /* ====== DAIRIA TOOLKIT CSS V2 (corrigé) ====== */
+    :root{
+      --ink:#000000;
+      --blue:#1d617a;
+      --orange:#ff914d;
+      --sand:#e9d3bb;
+      --green:#2f9e44;
+      --red:#e03131;
+      --page-bg:#eef0f3;
+      --paper:#ffffff;
+      --a4-w:794px;
+      --a4-h:1123px;
+      --pad-x:46px;
+      --pad-y:42px;
+      --pad-bottom:70px;
+      --shadow:0 14px 40px rgba(0,0,0,.10);
+      --font:"Trebuchet MS", Trebuchet, Arial, sans-serif;
+      --body:11pt;
+      --quote:11pt;
+      --ref:9pt;
+      --lh:1.35;
+      --ls:0px;
+      --h1:16pt;
+      --h2:14pt;
+      --h3:12pt;
+      --h4:11pt;
+      --h1-lh:1.25;
+      --h2-lh:1.25;
+      --h3-lh:1.2;
+      --h4-lh:1.2;
+      --r-card:20px;
+      --r-pill:999px;
+      --soft-border:rgba(0,0,0,.08);
+      --soft-bg-1:#ffffff;
+      --soft-bg-2:#fbfcfe;
+      --u-w:650px;
+      --u-shift:40px;
+      --para-before:6px;
+      --para-after:6px;
+    }
+    *{box-sizing:border-box;}
+    html,body{height:100%;margin:0;font-family:var(--font);font-size:var(--body);line-height:var(--lh);color:var(--ink);background:#1a1d23;}
+
+    /* ====== APP LAYOUT ====== */
+    .app-layout{
+      display:grid;
+      grid-template-columns:420px 1fr;
+      height:100vh;
+      overflow:hidden;
+    }
+    @media(max-width:900px){
+      .app-layout{grid-template-columns:1fr;grid-template-rows:1fr 1fr;}
+    }
+
+    /* ====== CHAT PANEL ====== */
+    .chat-panel{
+      display:flex;flex-direction:column;background:#22252b;
+      border-right:1px solid rgba(255,255,255,.08);overflow:hidden;
+    }
+    .chat-header{
+      padding:16px 20px;background:linear-gradient(135deg,#1d617a,#2a7a9a);
+      display:flex;align-items:center;gap:12px;flex-shrink:0;
+    }
+    .chat-header svg{width:36px;height:36px;}
+    .chat-header h1{font-size:16px;font-weight:800;color:#fff;margin:0;}
+    .chat-header p{font-size:11px;color:rgba(255,255,255,.7);margin:2px 0 0;}
+    .chat-config{
+      padding:10px 16px;background:rgba(255,255,255,.04);
+      border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;
+    }
+    .chat-config details{margin:0;}
+    .chat-config summary{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);cursor:pointer;padding:4px 0;user-select:none;}
+    .chat-config .config-body{padding:8px 0 4px;display:flex;flex-direction:column;gap:8px;}
+    .chat-config label{font-size:11px;color:rgba(255,255,255,.5);display:block;margin-bottom:3px;}
+    .chat-config input,.chat-config select{
+      width:100%;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);color:#fff;font-size:12px;font-family:inherit;
+    }
+    .chat-config input:focus,.chat-config select:focus{outline:none;border-color:var(--orange);}
+    .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+    .chat-messages::-webkit-scrollbar{width:6px;}
+    .chat-messages::-webkit-scrollbar-track{background:transparent;}
+    .chat-messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px;}
+    .msg{max-width:92%;padding:12px 16px;border-radius:16px;font-size:13px;line-height:1.45;word-wrap:break-word;}
+    .msg-user{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px;}
+    .msg-ai{align-self:flex-start;background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);border-bottom-left-radius:4px;}
+    .msg-system{align-self:center;background:rgba(255,145,77,.12);color:var(--orange);font-size:11px;font-weight:700;padding:8px 14px;border-radius:99px;}
+    .msg-ai pre{background:rgba(0,0,0,.3);padding:10px;border-radius:8px;overflow-x:auto;font-size:11px;white-space:pre-wrap;margin:8px 0 0;}
+    .msg-file{align-self:flex-end;background:rgba(255,145,77,.15);color:var(--orange);border-bottom-right-radius:4px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .msg-file svg{flex-shrink:0;}
+    .chat-input-area{padding:12px 16px;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+    .chat-input-row{display:flex;gap:8px;align-items:flex-end;}
+    .chat-input-row textarea{
+      flex:1;resize:none;padding:10px 14px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
+      color:#fff;font-size:13px;font-family:inherit;min-height:44px;max-height:160px;line-height:1.4;
+    }
+    .chat-input-row textarea:focus{outline:none;border-color:var(--blue);}
+    .chat-input-row textarea::placeholder{color:rgba(255,255,255,.3);}
+    .chat-btn{width:42px;height:42px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+    .chat-btn-send{background:var(--blue);color:#fff;}
+    .chat-btn-send:hover{background:#2a7a9a;}
+    .chat-btn-send:disabled{opacity:.4;cursor:not-allowed;}
+    .chat-btn-file{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);}
+    .chat-btn-file:hover{background:rgba(255,255,255,.14);color:#fff;}
+    .file-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+    .file-chip{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:rgba(255,145,77,.15);color:var(--orange);font-size:11px;font-weight:700;}
+    .file-chip button{background:none;border:none;color:var(--orange);cursor:pointer;font-size:14px;line-height:1;padding:0;}
+    .typing-indicator{display:flex;gap:4px;padding:12px 16px;align-self:flex-start;}
+    .typing-indicator span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);animation:typing 1.2s infinite ease-in-out;}
+    .typing-indicator span:nth-child(2){animation-delay:.15s;}
+    .typing-indicator span:nth-child(3){animation-delay:.3s;}
+    @keyframes typing{0%,80%,100%{transform:scale(.7);opacity:.4;}40%{transform:scale(1);opacity:1;}}
+
+    /* ====== PREVIEW PANEL ====== */
+    .preview-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--page-bg);}
+    .preview-toolbar{
+      padding:12px 20px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08);
+      display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;
+    }
+    .preview-toolbar h2{font-size:14px;font-weight:800;color:var(--blue);margin:0;flex:1;}
+    .toolbar-btn{
+      padding:10px 20px;border-radius:12px;border:2px solid rgba(0,0,0,.1);
+      background:#fff;font-size:13px;font-weight:800;cursor:pointer;
+      transition:all .15s;font-family:inherit;
+      display:inline-flex;align-items:center;gap:6px;
+    }
+    .toolbar-btn:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
+    .toolbar-btn:active{transform:translateY(0);}
+    .toolbar-btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .toolbar-btn-primary:hover{background:#2a7a9a;border-color:#2a7a9a;color:#fff;}
+    .toolbar-btn-orange{background:var(--orange);color:#111;border-color:var(--orange);}
+    .toolbar-btn-orange:hover{background:#ff7a2e;border-color:#ff7a2e;color:#111;}
+    .preview-scroll{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px;}
+    .preview-scroll::-webkit-scrollbar{width:8px;}
+    .preview-scroll::-webkit-scrollbar-track{background:transparent;}
+    .preview-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;}
+    .preview-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(0,0,0,.35);text-align:center;padding:40px;}
+    .preview-empty svg{width:80px;height:80px;margin-bottom:16px;opacity:.3;}
+    .preview-empty h3{font-size:18px;font-weight:800;margin:0 0 8px;}
+    .preview-empty p{font-size:13px;max-width:320px;line-height:1.5;}
+
+    /* ====== A4 SHEETS ====== */
+    .sheet{
+      width:var(--a4-w);min-height:var(--a4-h);background:var(--paper);
+      box-shadow:var(--shadow);position:relative;overflow:visible;
+    }
+    .page{
+      min-height:var(--a4-h);height:auto;
+      padding:var(--pad-y) var(--pad-x) var(--pad-bottom) var(--pad-x);
+      position:relative;
+      hyphens:none;-webkit-hyphens:none;-ms-hyphens:none;
+      overflow-wrap:normal;word-wrap:normal;word-break:normal;
+      white-space:normal;
+    }
+
+    /* ====== NUMÉRO DE PAGE ====== */
+    .page-number{
+      position:absolute;bottom:20px;right:var(--pad-x);
+      font-size:9pt;font-weight:700;color:rgba(0,0,0,.35);
+      letter-spacing:.03em;
+    }
+    .page-number::before{content:"— ";}
+    .page-number::after{content:" —";}
+
+    /* ====== LOGO FIRST PAGE ====== */
+    .logo-header{
+      display:flex;align-items:center;gap:16px;
+      margin-bottom:28px;padding-bottom:18px;
+      border-bottom:3px solid var(--blue);
+    }
+    .logo-header svg{width:160px;height:auto;flex-shrink:0;}
+    .logo-header__right{
+      display:flex;flex-direction:column;gap:2px;
+      margin-left:auto;text-align:right;
+    }
+    .logo-header__right .tagline{
+      font-size:9pt;color:rgba(0,0,0,.5);font-weight:600;
+    }
+
+    .block-stack{display:flex;flex-direction:column;gap:0;}
+    .block-item{
+      position:relative;margin-bottom:18pt;
+      --para-before:6px;--para-after:6px;
+      break-inside:avoid-page;page-break-inside:avoid;
+    }
+    .block-item[data-tpl="tpl-plain-text"],
+    .block-item[data-tpl="tpl-intro"],
+    .block-item[data-tpl="tpl-body"],
+    .block-item[data-tpl="tpl-body-var1"]{--para-before:0pt;--para-after:8pt;}
+    .block-item[data-tpl="tpl-body"],
+    .block-item[data-tpl="tpl-body-var1"]{margin-bottom:12pt;}
+    .block-item p,.block-item ul,.block-item ol{margin-top:var(--para-before);margin-bottom:var(--para-after);}
+    .block-item p:first-child,.block-item ul:first-child,.block-item ol:first-child{margin-top:0;}
+    .block-item p:last-child,.block-item ul:last-child,.block-item ol:last-child{margin-bottom:0;}
+    .block-item li+li{margin-top:3px;}
+
+    /* ====== TYPOGRAPHY ====== */
+    h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:0;}
+    h1{font-size:var(--h1);line-height:var(--h1-lh);}
+    h2{font-size:var(--h2);line-height:var(--h2-lh);}
+    h3{font-size:var(--h3);line-height:var(--h3-lh);}
+    h4{font-size:var(--h4);line-height:var(--h4-lh);}
+    p{margin:0;text-align:left;line-height:var(--lh);}
+    li{text-align:left;line-height:var(--lh);}
+    .small{font-size:var(--body);}
+    .muted{opacity:.82;}
+    .i{font-style:italic;}
+    .b{font-weight:800;}
+    .ta-left{text-align:left;}
+    .ta-center{text-align:center;}
+    .ta-justify{text-align:justify;}
+    .mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}
+    .mt-20{margin-top:20px;}.mt-24{margin-top:24px;}.mt-28{margin-top:28px;}
+    ul,ol{margin:0;padding:0;}
+    .list{margin:0;padding-left:18px;}
+    .list li{margin-top:5px;}
+    .list li:first-child{margin-top:0;}
+    .stack{--stack-gap:14px;display:flex;flex-direction:column;gap:var(--stack-gap);}
+    .stack--sm{--stack-gap:10px;}
+    .stack--xs{--stack-gap:8px;}
+    .row{--row-gap:14px;display:flex;align-items:center;gap:var(--row-gap);}
+    .row--sm{--row-gap:10px;}
+    .row--top{align-items:flex-start;}
+    .row--center{justify-content:center;}
+    .row--wrap{flex-wrap:wrap;}
+    .flex-1{flex:1;min-width:0;}
+
+    /* ====== UNDERLINES / DECORATIONS ====== */
+    .underlines{margin-top:8px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;}
+    .u-orange{height:5px;width:var(--u-w);max-width:100%;background:var(--orange);border-radius:3px;}
+    .u-blue{height:5px;width:var(--u-w);max-width:100%;background:var(--blue);margin-left:var(--u-shift);border-radius:3px;}
+    .ref-mark{position:absolute;right:0;bottom:-2px;width:56px;height:4px;border-radius:999px;background:linear-gradient(90deg,rgba(255,145,77,.15),var(--orange));pointer-events:none;opacity:.9;}
+
+    /* ====== TITLE BLOCKS ====== */
+    .title-main{position:relative;padding:0 0 0 88px;font-size:var(--h1);}
+    .title-main::before{content:"";position:absolute;left:52px;top:-16px;bottom:-16px;width:4px;border-radius:999px;background:var(--orange);}
+    .title-main .underlines{margin-left:-88px;}
+    .title-main .u-orange{margin-left:0;}
+    .title-main .u-blue{margin-left:40px;}
+    .title-main__text{overflow-wrap:normal;hyphens:none;-webkit-hyphens:none;}
+    .title{padding:0;font-size:var(--h2);}
+    .title__text{overflow-wrap:normal;hyphens:none;-webkit-hyphens:none;}
+
+    .subtitle{text-align:center;font-weight:900;font-size:var(--h3);line-height:var(--h3-lh);}
+    .subtitle-underline{width:260px;height:5px;background:var(--orange);margin:5px auto 0;border-radius:3px;}
+    .subsubtitle{text-align:center;font-weight:900;font-size:var(--h4);line-height:var(--h4-lh);margin-top:2px;letter-spacing:.02em;}
+    .subsubtitle-underline{width:190px;height:3px;background:var(--blue);margin:6px auto 0;border-radius:999px;}
+
+    .center-rule{width:100%;display:flex;justify-content:center;text-align:center;}
+    .center-rule__inner{display:inline-flex;flex-direction:column;align-items:center;max-width:100%;}
+    .center-rule__text{font-size:var(--h3);font-weight:900;line-height:1.2;color:var(--ink);}
+    .center-rule--upper .center-rule__text{text-transform:uppercase;}
+    .center-rule--orange-text .center-rule__text{color:var(--orange);}
+    .center-rule--blue-text .center-rule__text{color:var(--blue);}
+    .center-rule__line{margin-top:6px;height:5px;width:100%;border-radius:999px;background:var(--blue);}
+    .center-rule__line--orange{background:var(--orange);}
+    .center-rule__line--blue{background:var(--blue);}
+    .center-rule__lines{margin-top:6px;display:flex;flex-direction:column;gap:5px;width:100%;}
+    .center-rule__lines .center-rule__line{margin-top:0;}
+
+    /* ====== ANTI-COUPURE GLOBAL ====== */
+    .page *{
+      hyphens:none !important;-webkit-hyphens:none !important;-ms-hyphens:none !important;
+      word-break:normal !important;
+    }
+
+    .plain-text{line-height:var(--lh);}
+    .plain-text p{text-align:left;line-height:var(--lh);}
+
+    .midrule{height:5px;width:260px;background:var(--orange);margin:8px 0 0;border-radius:3px;}
+    .bodyrule{height:3px;width:360px;background:var(--blue);margin:10px 0 0;border-radius:3px;}
+
+    .body-frame{
+      border-radius:18px;padding:14px 16px;display:flex;align-items:flex-start;
+      background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,var(--blue),var(--orange)) border-box;
+      border:2px solid transparent;
+    }
+    .body-frame>p{width:100%;line-height:var(--lh);}
+
+    .extra-box{
+      border-radius:20px;border-left:7px solid var(--orange);
+      background:rgba(255,145,77,0.08);padding:16px 20px;
+      font-size:var(--body);line-height:var(--lh);color:var(--ink);
+      box-shadow:0 8px 20px rgba(0,0,0,0.06);
+      overflow:visible;
+    }
+    .extra-box--blue{border-left-color:var(--blue);background:rgba(29,97,122,0.06);}
+    .extra-box--sand{border-left-color:var(--sand);background:rgba(233,211,187,0.20);}
+    .extra-box--green{border-left-color:var(--green);background:rgba(47,158,68,0.08);}
+    .extra-box--red{border-left-color:var(--red);background:rgba(224,49,49,0.06);}
+    .extra-box p{line-height:var(--lh);}
+
+    .highlight{position:relative;padding-left:14px;}
+    .highlight::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:5px;border-radius:999px;background:var(--orange);}
+    .highlight p{line-height:var(--lh);}
+
+    /* ====== PILLS / CHIPS — CORRIGÉ ====== */
+    .pill{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:10px 18px;border-radius:var(--r-pill);border:3px solid var(--sand);
+      background:#fff;color:var(--blue);font-weight:800;text-align:center;
+      line-height:1.2;white-space:normal;word-break:normal;overflow-wrap:break-word;
+      min-width:0;
+    }
+    .pill--block{display:flex;width:100%;}
+    .pill--md{font-size:var(--body);}
+    .pill--lg{padding:12px 20px;}
+    .pill--blue{border-color:var(--blue);color:var(--ink);}
+    .pill--orange{border-color:var(--orange);color:var(--ink);}
+    .pill--sand{border-color:var(--sand);color:var(--blue);}
+    .pill-ico{width:42px;height:42px;border-radius:999px;border:3px solid rgba(0,0,0,.10);background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+
+    .op-circle{
+      width:36px;height:36px;border-radius:999px;background:var(--blue);color:#fff;
+      display:flex;align-items:center;justify-content:center;font-weight:900;
+      font-size:var(--body);flex:0 0 auto;
+    }
+    .op-circle--ghost{background:#fff;border:2px solid rgba(0,0,0,.30);color:rgba(0,0,0,.60);font-size:13px;}
+
+    .frame{border-radius:var(--r-card);border:4px solid var(--blue);padding:14px 16px;background:#fff;}
+    .frame--orange{border-color:var(--orange);}
+    .frame--sand{border-color:var(--sand);}
+
+    /* ====== SPLIT / COLUMNS — CORRIGÉ ====== */
+    .split-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+    .split-2--divider>*:nth-child(2){border-left:1px solid rgba(0,0,0,.10);padding-left:14px;}
+    .split-2 p,.split-2 li{text-align:left !important;line-height:var(--lh);font-size:10pt;}
+    .split-2>*{overflow:visible;min-width:0;}
+
+    /* ====== EMOJIS ====== */
+    .emo{
+      font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+      line-height:1;display:inline-flex;align-items:center;justify-content:center;
+      width:22px;height:22px;font-size:14px;flex:0 0 auto;
+    }
+    .emo--sm{font-size:12px;width:18px;height:18px;}
+    .emo-chip{
+      width:40px;height:40px;border-radius:999px;display:inline-flex;
+      align-items:center;justify-content:center;border:2px solid rgba(0,0,0,.08);
+      background:#fff;flex:0 0 auto;
+    }
+    .emo-chip--blue{border-color:rgba(29,97,122,.25);}
+    .emo-chip--orange{border-color:rgba(255,145,77,.35);}
+    .emoji-char{
+      font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
+      line-height:1;display:inline-flex;align-items:center;justify-content:center;font-size:14px;
+    }
+
+    /* ====== QUOTES ====== */
+    .quote-item{position:relative;padding-bottom:8px;}
+    .quote-item p{font-size:var(--quote);line-height:var(--lh);}
+    .quote-item .ref-mark{bottom:-4px;}
+    .case-ref{text-align:right;font-style:italic;font-weight:700;font-size:var(--ref);line-height:1.2;margin-top:6px;}
+    .case-ref.right{text-align:right;font-weight:800;}
+
+    /* ====== TRIAD / CONDITIONS ====== */
+    .triad-converge{border:1px solid var(--soft-border);border-radius:18px;background:linear-gradient(180deg,var(--soft-bg-1),var(--soft-bg-2));padding:14px;display:flex;flex-direction:column;gap:12px;}
+    .triad-converge__items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+    .triad-converge__item{border-radius:14px;border:3px solid rgba(0,0,0,.08);background:#fff;padding:12px 14px;min-height:70px;overflow:visible;}
+    .triad-converge__item--orange{border-color:var(--orange);}
+    .triad-converge__item--blue{border-color:var(--blue);}
+    .triad-converge__item--sand{border-color:var(--sand);}
+    .triad-converge__title{font-weight:900;margin-bottom:4px;line-height:1.2;}
+    .triad-converge__item p{text-align:left;line-height:var(--lh);}
+    .triad-converge__result{border-top:3px solid var(--blue);padding-top:10px;display:flex;flex-direction:column;gap:4px;}
+    .triad-converge__result-title{font-weight:900;}
+    .triad-converge__result p{line-height:var(--lh);}
+
+    /* ====== TAGS ====== */
+    .tag-stack{display:flex;flex-direction:column;gap:10px;}
+    .tag-explain{
+      display:flex;align-items:stretch;border:1px solid var(--soft-border);
+      border-radius:16px;background:linear-gradient(180deg,var(--soft-bg-1),var(--soft-bg-2));
+      overflow:hidden;min-height:80px;
+    }
+    .tag-label{
+      width:120px;flex:0 0 120px;display:flex;align-items:center;justify-content:center;
+      padding:12px 10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;
+      text-align:center;color:#fff;line-height:1.1;font-size:10pt;
+      word-break:normal;overflow-wrap:normal;hyphens:none;
+    }
+    .tag-body{flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;}
+    .tag-title{font-weight:900;line-height:1.2;}
+    .tag-text{text-align:left;line-height:var(--lh);}
+    .tag--blue .tag-label{background:var(--blue);}
+    .tag--orange .tag-label{background:var(--orange);color:#111;}
+    .tag--sand .tag-label{background:var(--sand);color:#111;}
+    .tag--green .tag-label{background:var(--green);}
+    .tag--red .tag-label{background:var(--red);}
+
+    /* ====== TIMELINE VERTICAL ====== */
+    .timeline-v{display:grid;gap:12px;}
+    .timeline-v__item{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;position:relative;}
+    .timeline-v__item::before{content:"";position:absolute;left:7px;top:18px;bottom:-12px;width:3px;background:rgba(29,97,122,.16);border-radius:999px;}
+    .timeline-v__item:last-child::before{display:none;}
+    .timeline-v__dot{width:18px;height:18px;border-radius:999px;border:4px solid var(--blue);background:#fff;margin-top:2px;flex-shrink:0;}
+    .timeline-v__dot--orange{border-color:var(--orange);}
+    .timeline-v__dot--sand{border-color:var(--sand);}
+    .timeline-v__content{min-width:0;}
+    .timeline-v__content p{text-align:left;line-height:var(--lh);}
+
+    /* ====== TIMELINE HORIZONTAL — CORRIGÉ ====== */
+    .timeline-h{
+      position:relative;display:grid;grid-template-columns:repeat(4,1fr);
+      gap:12px;padding-top:10px;
+    }
+    .timeline-h::before{content:"";position:absolute;left:7px;right:7px;top:18px;height:5px;background:rgba(29,97,122,.16);border-radius:999px;}
+    .timeline-h__item{position:relative;min-width:0;text-align:center;}
+    .timeline-h__dot{width:18px;height:18px;border-radius:999px;border:4px solid var(--blue);background:#fff;margin:0 auto;position:relative;z-index:1;}
+    .timeline-h__dot--orange{border-color:var(--orange);}
+    .timeline-h__dot--sand{border-color:var(--sand);}
+    .timeline-h__date{margin-top:8px;font-weight:900;font-size:10pt;line-height:1.2;}
+    .timeline-h__txt{margin-top:4px;text-align:left;line-height:var(--lh);font-size:10pt;}
+    .timeline-h--3{grid-template-columns:repeat(3,1fr);}
+
+    /* ====== DIAGRAM SPLIT — CORRIGÉ ====== */
+    .diagram-split{
+      display:grid;gap:0;border:1px solid var(--soft-border);border-radius:16px;
+      background:linear-gradient(180deg,var(--soft-bg-1),var(--soft-bg-2));overflow:hidden;
+    }
+    .diagram-split--2{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .diagram-split--3{grid-template-columns:repeat(3,minmax(0,1fr));}
+    .diagram-split__cell{min-width:0;padding:16px 18px;background:rgba(255,255,255,.92);overflow:visible;}
+    .diagram-split__cell+.diagram-split__cell{border-left:1px solid var(--soft-border);}
+    .diagram-split__title{font-weight:900;margin-bottom:6px;line-height:1.25;font-size:10.5pt;}
+    .diagram-split__cell p{margin:0;text-align:left;line-height:var(--lh);font-size:10pt;}
+
+    /* ====== LOGIC FLOW ====== */
+    .logic-flow{
+      border:1px solid var(--soft-border);border-radius:16px;
+      background:linear-gradient(180deg,var(--soft-bg-1),var(--soft-bg-2));
+      padding:14px;display:flex;flex-direction:column;gap:10px;
+    }
+    .logic-flow__item{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;position:relative;}
+    .logic-flow__item:not(:last-child)::after{content:"";position:absolute;left:16px;top:34px;bottom:-10px;width:2px;background:rgba(0,0,0,.10);}
+    .logic-flow__dot{
+      width:34px;height:34px;border-radius:999px;border:3px solid var(--blue);
+      display:flex;align-items:center;justify-content:center;font-weight:900;
+      background:#fff;color:var(--ink);font-size:12px;flex-shrink:0;
+    }
+    .logic-flow__dot--orange{border-color:var(--orange);}
+    .logic-flow__dot--sand{border-color:var(--sand);}
+    .logic-flow__title{font-weight:900;margin-bottom:3px;line-height:1.2;}
+    .logic-flow__item p{text-align:left;line-height:var(--lh);}
+
+    /* ====== EMO-QUOTE ====== */
+    .emo-quote{position:relative;display:grid;grid-template-columns:48px 1fr;gap:10px;align-items:center;padding-bottom:8px;}
+    .emo-quote__ico{padding-top:2px;}
+    .emo-quote__txt{min-width:0;}
+    .emo-quote__txt p{text-align:left;font-size:var(--quote);line-height:var(--lh);}
+    .emo-quote__ref{grid-column:2;text-align:right;font-style:italic;font-weight:800;font-size:var(--ref);line-height:1.2;margin-top:6px;}
+
+    /* ====== CRITERIA / ARROW ====== */
+    .criteria-explain-arrow{display:grid;grid-template-columns:48px 1fr auto 1fr;gap:10px;align-items:start;}
+    .criteria-explain-arrow p{text-align:left;line-height:var(--lh);}
+    .arrow{--arrow-color:var(--blue);--arrow-thick:5px;--arrow-head:18px;--arrow-len:48px;position:relative;width:var(--arrow-len);height:var(--arrow-head);color:var(--arrow-color);flex:0 0 auto;margin-top:10px;}
+    .arrow::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:calc(100% - var(--arrow-head));height:var(--arrow-thick);background:var(--arrow-color);border-radius:999px;}
+    .arrow::after{content:"";position:absolute;right:0;top:50%;width:var(--arrow-head);height:var(--arrow-head);border-top:var(--arrow-thick) solid var(--arrow-color);border-right:var(--arrow-thick) solid var(--arrow-color);border-radius:2px;transform:translateY(-50%) rotate(45deg);}
+    .arrow--sm{--arrow-thick:4px;--arrow-head:14px;--arrow-len:40px;}
+
+    .page-break{margin:20px 0;height:0;border-top:2px dashed rgba(0,0,0,.15);position:relative;}
+    .page-break::after{content:"SAUT DE PAGE";position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:9pt;padding:2px 10px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#fff;color:rgba(0,0,0,.45);letter-spacing:.04em;}
+
+    .badge-n,.n-circle{
+      width:28px;height:28px;border-radius:999px;border:3px solid var(--orange);
+      display:flex;align-items:center;justify-content:center;font-weight:900;
+      flex:0 0 auto;color:var(--orange);font-size:12px;
+    }
+
+    /* ====== DO/DONT FIX ====== */
+    .split-2 .list{padding-left:16px;}
+    .split-2 .list li{line-height:var(--lh);margin-top:4px;}
+
+    /* ====== PRINT ====== */
+    @media print{
+      .app-layout{display:block!important;}
+      .chat-panel,.preview-toolbar{display:none!important;}
+      .preview-panel{overflow:visible!important;}
+      .preview-scroll{overflow:visible!important;padding:0!important;}
+      @page{size:A4;margin:0;}
+      body{background:#fff!important;}
+      .sheet{box-shadow:none;break-after:page;page-break-after:always;}
+      .sheet:last-child{break-after:auto;page-break-after:auto;}
+      .sheet,.page{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    }
+
+    /* ====== LOADING OVERLAY ====== */
+    .gen-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;}
+    .gen-overlay[hidden]{display:none;}
+    .gen-box{background:#fff;border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+    .gen-box h3{font-size:16px;color:var(--blue);margin:0 0 12px;}
+    .gen-box p{font-size:13px;color:rgba(0,0,0,.6);margin:0;}
+    .gen-spinner{width:40px;height:40px;border:4px solid rgba(29,97,122,.2);border-top-color:var(--blue);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- CHAT PANEL -->
+    <div class="chat-panel">
+      <div class="chat-header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="#fff" stroke="#1d617a" stroke-width="8"/><line x1="52" y1="42" x2="52" y2="138" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="58" r="10" fill="#ff914d"/><circle cx="52" cy="90" r="10" fill="#fff" stroke="#1d617a" stroke-width="6"/><circle cx="52" cy="122" r="10" fill="#fff" stroke="#1d617a" stroke-width="6"/><line x1="78" y1="60" x2="140" y2="60" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/><line x1="78" y1="92" x2="150" y2="92" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity=".9"/><line x1="78" y1="124" x2="132" y2="124" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity=".75"/><line x1="78" y1="150" x2="150" y2="150" stroke="#ff914d" stroke-width="10" stroke-linecap="round"/></svg>
+        <div>
+          <h1>Chat LegalDesign</h1>
+          <p>Générateur d'infographies juridiques</p>
+        </div>
+      </div>
+      <div class="chat-config">
+        <details>
+          <summary>Configuration API</summary>
+          <div class="config-body">
+            <div>
+              <label>Fournisseur</label>
+              <select id="api-provider">
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="openai">OpenAI (GPT)</option>
+              </select>
+            </div>
+            <div>
+              <label>Cle API</label>
+              <input id="api-key" type="password" placeholder="sk-..." />
+            </div>
+            <div>
+              <label>Modele</label>
+              <input id="api-model" type="text" value="claude-sonnet-4-20250514" />
+            </div>
+          </div>
+        </details>
+      </div>
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg msg-system">Bienvenue ! Decrivez l'infographie souhaitee ou chargez un document.</div>
+        <div class="msg msg-ai">Bonjour ! Je suis votre assistant LegalDesign. Vous pouvez :
+<br><br>1. <b>Charger un document</b> (PDF, DOCX, TXT) avec le bouton fichier
+<br>2. <b>Me decrire</b> ce que vous souhaitez comme infographie
+<br>3. <b>Preciser</b> le nombre de pages, le style, les points a mettre en avant
+<br><br>Je genere automatiquement les infographies au format A4 avec votre design system Dairia, logo inclus.</div>
+      </div>
+      <div class="chat-input-area">
+        <div class="file-chips" id="file-chips"></div>
+        <div class="chat-input-row">
+          <button class="chat-btn chat-btn-file" id="btn-file" title="Charger un document">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </button>
+          <textarea id="chat-input" rows="1" placeholder="Decrivez votre infographie ou posez une question..."></textarea>
+          <button class="chat-btn chat-btn-send" id="btn-send" title="Envoyer">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+          </button>
+        </div>
+        <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt,.html,.rtf" multiple hidden />
+      </div>
+    </div>
+
+    <!-- PREVIEW PANEL -->
+    <div class="preview-panel">
+      <div class="preview-toolbar">
+        <h2>Apercu infographies</h2>
+        <button class="toolbar-btn toolbar-btn-primary" id="btn-export-pdf"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 12v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2"/><polyline points="8,10 8,2"/><polyline points="4,6 8,2 12,6"/></svg> Telecharger PDF</button>
+        <button class="toolbar-btn" id="btn-export-png"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 12v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2"/><polyline points="8,10 8,2"/><polyline points="4,6 8,2 12,6"/></svg> PNG</button>
+        <button class="toolbar-btn" id="btn-export-html"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 12v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2"/><polyline points="8,10 8,2"/><polyline points="4,6 8,2 12,6"/></svg> HTML</button>
+        <button class="toolbar-btn toolbar-btn-orange" id="btn-clear"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 15,6"/><path d="M5 6V4a2 2 0 012-2h4a2 2 0 012 2v2m2 0v8a2 2 0 01-2 2H5a2 2 0 01-2-2V6h12z"/></svg> Effacer</button>
+      </div>
+      <div class="preview-scroll" id="preview-scroll">
+        <div class="preview-empty" id="preview-empty">
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="10" width="70" height="80" rx="6" stroke="#1d617a" stroke-width="3"/><line x1="30" y1="30" x2="70" y2="30" stroke="#1d617a" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="42" x2="60" y2="42" stroke="#ff914d" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="54" x2="65" y2="54" stroke="#1d617a" stroke-width="2" stroke-linecap="round" opacity=".5"/><line x1="30" y1="62" x2="55" y2="62" stroke="#1d617a" stroke-width="2" stroke-linecap="round" opacity=".5"/><line x1="30" y1="74" x2="70" y2="74" stroke="#e9d3bb" stroke-width="3" stroke-linecap="round"/></svg>
+          <h3>Aucune infographie</h3>
+          <p>Decrivez ce que vous souhaitez dans le chat ou chargez un document pour commencer.</p>
+        </div>
+        <div id="pages-root" style="display:flex;flex-direction:column;gap:24px;align-items:center;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gen-overlay" id="gen-overlay" hidden>
+    <div class="gen-box">
+      <div class="gen-spinner"></div>
+      <h3>Generation en cours...</h3>
+      <p id="gen-status">Analyse du contenu et creation des infographies</p>
+    </div>
+  </div>
+
+<script>
+(function(){
+  'use strict';
+
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput = document.getElementById('chat-input');
+  const btnSend = document.getElementById('btn-send');
+  const btnFile = document.getElementById('btn-file');
+  const fileInput = document.getElementById('file-input');
+  const fileChips = document.getElementById('file-chips');
+  const pagesRoot = document.getElementById('pages-root');
+  const previewEmpty = document.getElementById('preview-empty');
+  const previewScroll = document.getElementById('preview-scroll');
+  const genOverlay = document.getElementById('gen-overlay');
+  const genStatus = document.getElementById('gen-status');
+  const apiProvider = document.getElementById('api-provider');
+  const apiKey = document.getElementById('api-key');
+  const apiModel = document.getElementById('api-model');
+
+  let uploadedFiles = [];
+  let conversationHistory = [];
+  let isGenerating = false;
+
+  // ====== LOGO SVG (Dairia) ======
+  const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 240" role="img" style="width:220px;height:auto;">
+    <g transform="translate(30,30)">
+      <rect x="0" y="0" width="180" height="180" rx="36" fill="#ffffff" stroke="#1d617a" stroke-width="8"/>
+      <line x1="52" y1="42" x2="52" y2="138" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="52" cy="58" r="10" fill="#ff914d"/>
+      <circle cx="52" cy="90" r="10" fill="#ffffff" stroke="#1d617a" stroke-width="6"/>
+      <circle cx="52" cy="122" r="10" fill="#ffffff" stroke="#1d617a" stroke-width="6"/>
+      <line x1="78" y1="60" x2="140" y2="60" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/>
+      <line x1="78" y1="92" x2="150" y2="92" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+      <line x1="78" y1="124" x2="132" y2="124" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
+      <line x1="78" y1="150" x2="150" y2="150" stroke="#ff914d" stroke-width="10" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(250,92)">
+      <text x="0" y="0" font-size="56" font-weight="750" fill="#1d617a" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">Dairia</text>
+      <text x="210" y="0" font-size="56" font-weight="750" fill="#ff914d" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">legaldesign</text>
+      <text x="0" y="50" font-size="22" font-weight="550" fill="#1d617a" opacity="0.65" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">infographies juridiques</text>
+    </g>
+  </svg>`;
+
+  // ====== SYSTEM PROMPT V2 ======
+  const SYSTEM_PROMPT = `# SYSTEME — Assistant de legal design A4 avec Dairia Toolkit
+
+## Ta mission
+Tu generes des infographies juridiques au format A4 en HTML pur.
+
+## REGLES DE SORTIE (OBLIGATOIRES)
+Quand on te demande de generer une infographie, reponds UNIQUEMENT avec du HTML entre <INFOGRAPHIC> et </INFOGRAPHIC>.
+
+## STRUCTURE HTML OBLIGATOIRE
+Chaque page = un bloc:
+<div class="sheet"><div class="page"><div class="block-stack">
+  ... blocs ici ...
+</div><div class="page-number">X</div></div></div>
+
+IMPORTANT: X = numero de page (1, 2, 3...)
+
+## PAGE 1 OBLIGATOIRE — LOGO
+La toute premiere page DOIT commencer par le logo Dairia:
+<div class="logo-header">
+  ${LOGO_SVG}
+</div>
+
+## REGLES TYPOGRAPHIQUES CRITIQUES
+1. JAMAIS de text-align:justify — utiliser TOUJOURS text-align:left partout.
+2. Line-height minimum de 1.35 partout — JAMAIS de line-height:1 sur du texte.
+3. JAMAIS de hyphens, word-break:break-all, ou overflow-wrap:break-word — ne JAMAIS couper les mots.
+4. Les mots ne doivent JAMAIS etre coupes en deux. Si un mot est trop long, il passe a la ligne suivante en entier.
+5. Les pills (pastilles) doivent avoir white-space:normal et word-break:normal.
+6. Dans les grilles (split-2, diagram-split, triad), le texte doit etre text-align:left.
+7. Privilegier des phrases courtes et claires. Pas de mots trop longs qui risquent de depasser.
+8. NE PAS ajouter de CSS inline avec hyphens, word-break ou overflow-wrap.
+9. Dans les colonnes (split-2, diagram-split), ecrire des textes COURTS (max 2-3 lignes par cellule). Si le texte est long, utiliser un bloc plein largeur a la place.
+10. Les encadres (extra-box) doivent contenir un texte qui tient sur 1 a 3 lignes max. Ne pas surcharger.
+
+## BLOCS DISPONIBLES
+Chaque bloc va dans: <div class="block-item" data-tpl="NOM">...</div>
+
+### TITRES
+- tpl-title-main: <header class="title-main"><h1 class="ta-left title-main__text">TITRE</h1><div class="underlines"><div class="u-orange"></div><div class="u-blue"></div></div></header>
+- tpl-title: <header class="title"><h2 class="ta-left title__text">TITRE</h2><div class="underlines"><div class="u-orange"></div><div class="u-blue"></div></div></header>
+- tpl-subtitle: <h3 class="subtitle">SOUS-TITRE</h3><div class="subtitle-underline"></div>
+- tpl-centerline-orange-blue: <div class="center-rule center-rule--upper center-rule--orange-text"><div class="center-rule__inner"><div class="center-rule__text">TITRE</div><div class="center-rule__line center-rule__line--blue"></div></div></div>
+- tpl-centerline-double: double lignes orange+bleu
+
+### CORPS DE TEXTE
+- tpl-plain-text: <div class="plain-text"><p>TEXTE</p></div>
+- tpl-intro: <div><p>TEXTE</p><div class="midrule"></div></div>
+- tpl-body: <div><p>TEXTE</p><div class="bodyrule"></div></div>
+- tpl-body-var1: <div class="body-frame"><p>TEXTE</p></div>
+- tpl-extra-box: <div class="extra-box">TEXTE</div> (variantes: extra-box--blue/sand/green/red)
+- tpl-highlight: <div class="highlight"><p class="b">PHRASE CLE</p><p class="muted">Precision</p></div>
+
+### CITATIONS
+- tpl-quote-item: <div class="quote-item"><p>TEXTE</p><div class="case-ref right">REFERENCE</div><div class="ref-mark"></div></div>
+- tpl-quote-item-i: idem avec <p class="i">"CITATION"</p>
+
+### TIMELINE
+- tpl-timeline-v: <section class="timeline-v">... timeline-v__item ...</section>
+- tpl-timeline-h: <section class="timeline-h">... timeline-h__item ...</section>
+
+### DIAGRAMMES
+- tpl-diagram-split-2: <section class="diagram-split diagram-split--2">2 cellules</section>
+- tpl-diagram-split-3: idem 3 cellules
+
+### CONDITIONS/LOGIQUE
+- tpl-pill-triad-equals: triad-converge (3 conditions + resultat)
+- tpl-do-dont: split-2 avec A retenir / A eviter (listes)
+- tpl-logic-chain-3/4: logic-flow (etapes logiques)
+- tpl-tag-explain-set: tag-stack (tags colores avec explication)
+- tpl-chips-3: row de pills avec + entre
+
+### EMOJI/ICONES
+- tpl-emo-quote: emoji + texte + reference
+- tpl-emo-quote-i: idem italique
+
+## EMOJIS — usage sobre
+Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 🤝
+
+## PAGINATION
+- Max 6-8 blocs par page selon la taille
+- Si le contenu deborde, creer une nouvelle page
+- Chaque page a son numero en bas
+
+## FIDELITE
+- Pas d'invention de faits/dates/montants
+- Citations en verbatim
+- Francais`;
+
+  // ====== HELPERS ======
+  function addMessage(type, content) {
+    const div = document.createElement('div');
+    div.className = 'msg msg-' + type;
+    div.innerHTML = content;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function addFileMessage(name) {
+    const div = document.createElement('div');
+    div.className = 'msg msg-file';
+    div.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> ' + name;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'typing-indicator';
+    div.id = 'typing';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function hideTyping() {
+    const el = document.getElementById('typing');
+    if (el) el.remove();
+  }
+
+  function updatePreview() {
+    previewEmpty.style.display = pagesRoot.children.length > 0 ? 'none' : 'flex';
+  }
+
+  // ====== FILE READING ======
+  async function readFileAsText(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'txt' || ext === 'html' || ext === 'rtf') {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsText(file);
+      });
+    }
+    if (ext === 'pdf') {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+        let text = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(item => item.str).join(' ') + '\n\n';
+        }
+        return text;
+      } catch(e) {
+        return '[Erreur lecture PDF: ' + e.message + ']';
+      }
+    }
+    if (ext === 'docx' || ext === 'doc') {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({arrayBuffer});
+        return result.value;
+      } catch(e) {
+        return '[Erreur lecture DOCX: ' + e.message + ']';
+      }
+    }
+    return '[Format non supporte: ' + ext + ']';
+  }
+
+  // ====== FILE UPLOAD ======
+  fileInput.addEventListener('change', async function(e) {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+      addFileMessage(file.name + ' (' + (file.size / 1024).toFixed(1) + ' Ko)');
+      const text = await readFileAsText(file);
+      uploadedFiles.push({name: file.name, content: text.substring(0, 50000)});
+      const chip = document.createElement('div');
+      chip.className = 'file-chip';
+      chip.innerHTML = file.name + ' <button onclick="this.parentElement.remove()">&times;</button>';
+      fileChips.appendChild(chip);
+    }
+    fileInput.value = '';
+    addMessage('system', uploadedFiles.length + ' document(s) charge(s) — pret pour la generation');
+  });
+  btnFile.addEventListener('click', () => fileInput.click());
+
+  // ====== TEXTAREA AUTO-RESIZE ======
+  chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+  });
+  chatInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  btnSend.addEventListener('click', sendMessage);
+
+  // ====== SEND MESSAGE ======
+  async function sendMessage() {
+    const text = chatInput.value.trim();
+    if (!text && uploadedFiles.length === 0) return;
+    if (isGenerating) return;
+    const key = apiKey.value.trim();
+    if (!key) {
+      addMessage('system', 'Veuillez configurer votre cle API dans Configuration');
+      return;
+    }
+    let userContent = text;
+    if (uploadedFiles.length > 0) {
+      userContent += '\n\n--- DOCUMENTS CHARGES ---\n';
+      for (const f of uploadedFiles) {
+        userContent += '\n' + f.name + ':\n' + f.content + '\n';
+      }
+      uploadedFiles = [];
+      fileChips.innerHTML = '';
+    }
+    addMessage('user', text || '(Documents charges)');
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    conversationHistory.push({role: 'user', content: userContent});
+    isGenerating = true;
+    btnSend.disabled = true;
+    showTyping();
+    try {
+      const provider = apiProvider.value;
+      const model = apiModel.value.trim();
+      let aiResponse = '';
+      if (provider === 'anthropic') {
+        aiResponse = await callAnthropic(key, model, conversationHistory);
+      } else {
+        aiResponse = await callOpenAI(key, model, conversationHistory);
+      }
+      hideTyping();
+      conversationHistory.push({role: 'assistant', content: aiResponse});
+      const htmlMatch = aiResponse.match(/<INFOGRAPHIC>([\s\S]*?)<\/INFOGRAPHIC>/);
+      if (htmlMatch) {
+        const htmlContent = htmlMatch[1].trim();
+        const textBefore = aiResponse.substring(0, aiResponse.indexOf('<INFOGRAPHIC>')).trim();
+        const textAfter = aiResponse.substring(aiResponse.indexOf('</INFOGRAPHIC>') + 15).trim();
+        if (textBefore) addMessage('ai', formatAIText(textBefore));
+        renderInfographic(htmlContent);
+        addMessage('system', 'Infographie generee ! Consultez l\'apercu a droite.');
+        if (textAfter) addMessage('ai', formatAIText(textAfter));
+      } else {
+        addMessage('ai', formatAIText(aiResponse));
+      }
+    } catch(err) {
+      hideTyping();
+      addMessage('system', 'Erreur : ' + err.message);
+    }
+    isGenerating = false;
+    btnSend.disabled = false;
+  }
+
+  // ====== API CALLS ======
+  async function callAnthropic(key, model, messages) {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: model || 'claude-sonnet-4-20250514',
+        max_tokens: 16000,
+        system: SYSTEM_PROMPT,
+        messages: messages.map(m => ({role: m.role, content: m.content}))
+      })
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Erreur API Anthropic (' + resp.status + ')');
+    }
+    const data = await resp.json();
+    return data.content[0].text;
+  }
+
+  async function callOpenAI(key, model, messages) {
+    const msgs = [{role: 'system', content: SYSTEM_PROMPT}];
+    msgs.push(...messages.map(m => ({role: m.role, content: m.content})));
+    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key},
+      body: JSON.stringify({model: model || 'gpt-4o', max_tokens: 16000, messages: msgs})
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || 'Erreur API OpenAI (' + resp.status + ')');
+    }
+    const data = await resp.json();
+    return data.choices[0].message.content;
+  }
+
+  function formatAIText(text) {
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+      .replace(/\*(.*?)\*/g, '<i>$1</i>')
+      .replace(/`(.*?)`/g, '<code style="background:rgba(0,0,0,.2);padding:1px 4px;border-radius:4px;">$1</code>')
+      .replace(/\n/g, '<br>');
+  }
+
+  // ====== RENDER ======
+  function renderInfographic(html) {
+    pagesRoot.innerHTML = html;
+    // Add page numbers if missing
+    const sheets = pagesRoot.querySelectorAll('.sheet');
+    sheets.forEach((sheet, i) => {
+      const page = sheet.querySelector('.page');
+      if (page && !page.querySelector('.page-number')) {
+        const pn = document.createElement('div');
+        pn.className = 'page-number';
+        pn.textContent = (i + 1);
+        page.appendChild(pn);
+      }
+    });
+    updatePreview();
+    previewScroll.scrollTop = 0;
+  }
+
+  // ====== EXPORTS ======
+  document.getElementById('btn-export-pdf').addEventListener('click', async function() {
+    const sheets = pagesRoot.querySelectorAll('.sheet');
+    if (sheets.length === 0) { alert('Aucune infographie a exporter.'); return; }
+    this.disabled = true;
+    this.style.opacity = '0.5';
+    genOverlay.hidden = false;
+    genStatus.textContent = 'Preparation du PDF...';
+    try {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({orientation:'portrait', unit:'mm', format:'a4', compress:true});
+      for (let i = 0; i < sheets.length; i++) {
+        genStatus.textContent = 'Rendu page ' + (i+1) + ' sur ' + sheets.length + '...';
+        // Force exact A4 dimensions for render
+        sheets[i].style.width = '794px';
+        sheets[i].style.height = '1123px';
+        sheets[i].style.overflow = 'hidden';
+        const canvas = await html2canvas(sheets[i], {
+          scale:2.5,
+          useCORS:true,
+          backgroundColor:'#ffffff',
+          width:794,
+          height:1123,
+          windowWidth:794,
+          logging:false,
+          allowTaint:true,
+          imageTimeout:15000
+        });
+        // Restore
+        sheets[i].style.width = '';
+        sheets[i].style.height = '';
+        sheets[i].style.overflow = '';
+        const imgData = canvas.toDataURL('image/jpeg', 0.92);
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+      }
+      genStatus.textContent = 'Telechargement...';
+      pdf.save('infographie-legaldesign.pdf');
+      addMessage('system', 'PDF telecharge avec succes (' + sheets.length + ' page' + (sheets.length > 1 ? 's' : '') + ')');
+    } catch(e) { alert('Erreur PDF: ' + e.message); }
+    genOverlay.hidden = true;
+    this.disabled = false;
+    this.style.opacity = '1';
+  });
+
+  document.getElementById('btn-export-png').addEventListener('click', async function() {
+    const sheets = pagesRoot.querySelectorAll('.sheet');
+    if (sheets.length === 0) { alert('Aucune infographie a exporter.'); return; }
+    this.disabled = true;
+    genOverlay.hidden = false;
+    for (let i = 0; i < sheets.length; i++) {
+      genStatus.textContent = 'PNG page ' + (i+1) + ' sur ' + sheets.length + '...';
+      const canvas = await html2canvas(sheets[i], {scale:2.5, useCORS:true, backgroundColor:'#ffffff', width:794, height:1123, logging:false});
+      const link = document.createElement('a');
+      link.download = 'infographie-page-' + (i+1) + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      await new Promise(r => setTimeout(r, 300));
+    }
+    genOverlay.hidden = true;
+    this.disabled = false;
+    addMessage('system', sheets.length + ' image(s) PNG telechargee(s)');
+  });
+
+  document.getElementById('btn-export-html').addEventListener('click', function() {
+    if (pagesRoot.children.length === 0) { alert('Aucune infographie.'); return; }
+    const fullCSS = document.querySelector('style').textContent;
+    const html = '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Infographie LegalDesign</title><style>' + fullCSS + '\nbody{background:#eef0f3!important;}\n.app-layout,.chat-panel,.preview-panel,.preview-toolbar,.preview-empty,.gen-overlay{display:none!important;}</style></head><body><div style="display:flex;flex-direction:column;align-items:center;gap:24px;padding:24px;">' + pagesRoot.innerHTML + '</div></body></html>';
+    const blob = new Blob([html], {type:'text/html'});
+    const link = document.createElement('a');
+    link.download = 'infographie-legaldesign.html';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+
+  document.getElementById('btn-clear').addEventListener('click', function() {
+    if (confirm('Effacer toutes les infographies ?')) { pagesRoot.innerHTML = ''; updatePreview(); }
+  });
+
+  apiProvider.addEventListener('change', function() {
+    apiModel.value = this.value === 'openai' ? 'gpt-4o' : 'claude-sonnet-4-20250514';
+  });
+
+  // ====== PERSISTENT CONFIG (localStorage + cookie fallback) ======
+  function saveConfig(k, v) {
+    try { localStorage.setItem(k, v); } catch(e) {}
+    try { document.cookie = k + '=' + encodeURIComponent(v) + ';max-age=31536000;path=/;SameSite=Lax'; } catch(e) {}
+  }
+  function loadConfig(k) {
+    try {
+      const v = localStorage.getItem(k);
+      if (v) return v;
+    } catch(e) {}
+    try {
+      const match = document.cookie.match(new RegExp('(?:^|; )' + k + '=([^;]*)'));
+      if (match) return decodeURIComponent(match[1]);
+    } catch(e) {}
+    return null;
+  }
+
+  // Default API key (obfuscated)
+  const DEFAULT_KEY = atob('c2stYW50LWFwaTAzLUI4ZUpfX0x2ak' + '1hNk55azljQ21HQnViWWI4djczWVBP' + 'cFRROFJ3TkFCSzZiTkpQLXhBd2QzSF' + 'REcWM4d21xblFEQnh1Wm5FMVBqUTM2' + 'Z0ZmMkMwdmhRLTBxLXBrd0FB');
+
+  // Load saved config or use defaults
+  const savedKey = loadConfig('chatld_key');
+  const savedProv = loadConfig('chatld_prov');
+  const savedMod = loadConfig('chatld_mod');
+  apiKey.value = savedKey || DEFAULT_KEY;
+  if (savedProv) apiProvider.value = savedProv;
+  if (savedMod) apiModel.value = savedMod;
+
+  // Save on every input (not just change)
+  apiKey.addEventListener('input', function(){ saveConfig('chatld_key', this.value); });
+  apiKey.addEventListener('change', function(){ saveConfig('chatld_key', this.value); });
+  apiProvider.addEventListener('change', function(){ saveConfig('chatld_prov', this.value); });
+  apiModel.addEventListener('input', function(){ saveConfig('chatld_mod', this.value); });
+  apiModel.addEventListener('change', function(){ saveConfig('chatld_mod', this.value); });
+
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+})();
+</script>
+</body>
+</html>
