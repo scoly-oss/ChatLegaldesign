@@ -60,7 +60,28 @@
       overflow:hidden;
     }
     @media(max-width:900px){
-      .app-layout{grid-template-columns:1fr;grid-template-rows:1fr 1fr;}
+      .app-layout{
+        grid-template-columns:1fr;
+        grid-template-rows:1fr;
+      }
+      .app-layout>.chat-panel,
+      .app-layout>.preview-panel{
+        grid-column:1;grid-row:1;
+        min-height:0;
+      }
+      .app-layout>.preview-panel{z-index:1;}
+      .app-layout>.chat-panel{z-index:2;}
+      .app-layout>.chat-panel.panel-hidden{display:none;}
+      .app-layout>.preview-panel.panel-hidden{display:none;}
+      .mobile-toggle{
+        display:flex;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+        z-index:100;background:var(--blue);color:#fff;border:none;border-radius:999px;
+        padding:12px 24px;font-size:14px;font-weight:800;font-family:inherit;
+        cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.35);gap:8px;align-items:center;
+        min-height:48px;
+      }
+      .mobile-toggle:hover{background:#2a7a9a;}
+      .mobile-toggle svg{width:20px;height:20px;flex-shrink:0;}
     }
 
     /* ====== CHAT PANEL ====== */
@@ -504,6 +525,200 @@
     .gen-box p{font-size:13px;color:rgba(0,0,0,.6);margin:0;}
     .gen-spinner{width:40px;height:40px;border:4px solid rgba(29,97,122,.2);border-top-color:var(--blue);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ====== MOBILE TOGGLE — hidden by default on desktop ====== */
+    .mobile-toggle{display:none;}
+
+    /* ====== RESPONSIVE: TABLET & MOBILE (max-width: 768px) ====== */
+    @media(max-width:768px){
+      /* -- Chat panel -- */
+      .chat-header h1{font-size:15px;}
+      .chat-header p{font-size:11px;}
+      .chat-header svg{width:30px;height:30px;}
+      .chat-header{padding:12px 14px;gap:10px;}
+
+      .chat-config input,.chat-config select{
+        padding:10px 12px;font-size:13px;min-height:44px;
+      }
+      .chat-config summary{font-size:13px;padding:6px 0;min-height:44px;display:flex;align-items:center;}
+
+      .chat-input-row textarea{
+        font-size:14px;min-height:44px;padding:11px 14px;
+      }
+      .chat-btn{width:44px;height:44px;}
+
+      .msg{font-size:14px;padding:10px 14px;max-width:95%;}
+      .msg-system{font-size:12px;}
+      .msg-ai pre{font-size:12px;padding:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+      .msg-file{font-size:13px;}
+
+      /* -- Preview panel -- */
+      .preview-toolbar{
+        padding:10px 12px;gap:6px;flex-wrap:wrap;
+      }
+      .preview-toolbar h2{font-size:13px;flex:1 1 100%;margin-bottom:4px;}
+      .toolbar-btn{
+        padding:8px 12px;font-size:12px;border-radius:10px;min-height:44px;
+        flex:1 1 auto;justify-content:center;
+      }
+      .preview-scroll{padding:16px 8px;}
+      .preview-empty{padding:24px 16px;}
+      .preview-empty svg{width:60px;height:60px;}
+      .preview-empty h3{font-size:16px;}
+      .preview-empty p{font-size:13px;}
+
+      /* -- A4 Sheet scaling for mobile -- */
+      .sheet{
+        width:100%!important;max-width:794px;min-height:auto!important;
+        height:auto!important;
+      }
+      .page{
+        min-height:auto;height:auto;
+        padding:var(--pad-y) 24px var(--pad-bottom) 24px;
+        overflow-x:hidden;
+      }
+
+      /* -- Title blocks -- */
+      .title-main{padding-left:40px;font-size:14pt;}
+      .title-main::before{left:20px;}
+      .title-main .underlines{margin-left:-40px;}
+      .title-main .u-blue{margin-left:20px;}
+      .title{font-size:13pt;}
+      .subtitle{font-size:12pt;}
+      .subtitle-underline{width:180px;}
+      .subsubtitle{font-size:11pt;}
+      .subsubtitle-underline{width:140px;}
+
+      /* -- Logo header -- */
+      .logo-header{gap:10px;margin-bottom:20px;padding-bottom:14px;}
+      .logo-header svg{width:120px;}
+      .logo-header__right .tagline{font-size:8pt;}
+
+      /* -- Grid layouts: stack on mobile -- */
+      .split-2{grid-template-columns:1fr;gap:10px;}
+      .split-2--divider>*:nth-child(2){border-left:none;padding-left:0;border-top:1px solid rgba(0,0,0,.10);padding-top:10px;}
+
+      .diagram-split--2,.diagram-split--3{grid-template-columns:1fr;}
+      .diagram-split__cell+.diagram-split__cell{border-left:none;border-top:1px solid var(--soft-border);}
+
+      .triad-converge__items{grid-template-columns:1fr;gap:8px;}
+
+      .timeline-h{grid-template-columns:1fr;gap:14px;padding-top:0;}
+      .timeline-h::before{display:none;}
+      .timeline-h__item{text-align:left;display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;}
+      .timeline-h__dot{margin:2px 0 0;display:block;}
+      .timeline-h__date{margin-top:0;text-align:left;}
+      .timeline-h__txt{text-align:left;grid-column:2;}
+      .timeline-h--3{grid-template-columns:1fr;}
+
+      /* -- Criteria arrow: stack -- */
+      .criteria-explain-arrow{grid-template-columns:1fr;gap:8px;}
+      .arrow{transform:rotate(90deg);margin:4px auto;}
+
+      /* -- Tags -- */
+      .tag-explain{flex-direction:column;}
+      .tag-label{width:100%;flex:0 0 auto;padding:10px 14px;}
+
+      /* -- Emo-quote -- */
+      .emo-quote{grid-template-columns:36px 1fr;gap:8px;}
+
+      /* -- Logic flow -- */
+      .logic-flow__item{grid-template-columns:28px 1fr;gap:8px;}
+      .logic-flow__dot{width:28px;height:28px;font-size:11px;}
+
+      /* -- Pill / chips -- */
+      .pill{padding:8px 14px;font-size:10pt;}
+      .pill-ico{width:36px;height:36px;}
+      .op-circle{width:30px;height:30px;font-size:12px;}
+
+      /* -- Underlines / decorations -- */
+      .u-orange,.u-blue{max-width:100%;}
+      .midrule{width:180px;max-width:100%;}
+      .bodyrule{width:260px;max-width:100%;}
+      .center-rule__line{max-width:100%;}
+
+      /* -- Gen overlay -- */
+      .gen-box{padding:24px 20px;border-radius:16px;margin:16px;max-width:calc(100vw - 32px);}
+      .gen-box h3{font-size:15px;}
+      .gen-box p{font-size:12px;}
+
+      /* -- Body text minimum readability -- */
+      .page p,.page li,.page .plain-text,.page .extra-box,
+      .page .tag-text,.page .diagram-split__cell p,
+      .page .triad-converge__item p,.page .timeline-v__content p,
+      .page .logic-flow__item p,.page .emo-quote__txt p{
+        font-size:max(var(--body), 11pt);
+      }
+    }
+
+    /* ====== RESPONSIVE: SMALL MOBILE (max-width: 480px) ====== */
+    @media(max-width:480px){
+      :root{
+        --pad-x:16px;
+        --pad-y:20px;
+        --pad-bottom:40px;
+        --h1:14pt;
+        --h2:12pt;
+        --h3:11pt;
+        --h4:10.5pt;
+      }
+
+      .chat-header{padding:10px 12px;gap:8px;}
+      .chat-header h1{font-size:14px;}
+      .chat-header svg{width:26px;height:26px;}
+
+      .chat-input-area{padding:8px 10px;}
+      .chat-input-row{gap:6px;}
+      .chat-input-row textarea{font-size:14px;padding:10px 12px;border-radius:12px;}
+      .chat-messages{padding:10px;gap:8px;}
+      .msg{font-size:14px;padding:10px 12px;border-radius:14px;max-width:98%;}
+
+      .preview-toolbar{padding:8px 10px;gap:4px;}
+      .preview-toolbar h2{font-size:12px;}
+      .toolbar-btn{padding:6px 8px;font-size:11px;gap:4px;min-height:44px;}
+      .toolbar-btn svg{width:14px;height:14px;}
+
+      .preview-scroll{padding:10px 4px;}
+
+      .page{padding:16px 12px 36px 12px;}
+
+      .title-main{padding-left:28px;font-size:13pt;}
+      .title-main::before{left:12px;width:3px;}
+      .title-main .underlines{margin-left:-28px;}
+
+      .logo-header{flex-direction:column;align-items:flex-start;gap:8px;}
+      .logo-header svg{width:100px;}
+      .logo-header__right{margin-left:0;text-align:left;}
+
+      .sheet{border-radius:0;}
+
+      .extra-box{padding:12px 14px;border-radius:14px;border-left-width:5px;}
+      .body-frame{padding:10px 12px;border-radius:14px;}
+      .frame{padding:10px 12px;border-radius:14px;border-width:3px;}
+
+      .tag-label{font-size:9pt;padding:8px 12px;}
+      .tag-body{padding:10px 12px;}
+
+      .file-chip{font-size:10px;padding:4px 8px;}
+
+      .page-number{font-size:8pt;bottom:12px;right:12px;}
+
+      /* Touch-friendly: ensure tappable targets */
+      .file-chip button{min-width:32px;min-height:32px;font-size:18px;display:flex;align-items:center;justify-content:center;}
+      button,a,[role="button"]{min-height:44px;}
+      select,input[type="text"],input[type="password"]{min-height:44px;font-size:14px;}
+
+      .gen-box{padding:20px 16px;margin:12px;}
+    }
+
+    /* ====== RESPONSIVE: Prevent horizontal overflow globally ====== */
+    @media(max-width:900px){
+      html{overflow-x:hidden;}
+      body{overflow-x:hidden;-webkit-text-size-adjust:100%;}
+      .page *{max-width:100%;}
+      .page img,.page svg{max-width:100%;height:auto;}
+      #pages-root{width:100%;max-width:100%;}
+    }
   </style>
 </head>
 <body>
@@ -581,6 +796,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Mobile panel toggle button -->
+  <button class="mobile-toggle" id="mobile-toggle" aria-label="Basculer entre Chat et Apercu">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="16" height="14" rx="2"/><line x1="10" y1="3" x2="10" y2="17"/></svg>
+    <span id="toggle-label">Voir apercu</span>
+  </button>
 
   <div class="gen-overlay" id="gen-overlay" hidden>
     <div class="gen-box">
@@ -1068,6 +1289,39 @@ Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 �
   if (window.pdfjsLib) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   }
+
+  // ====== MOBILE PANEL TOGGLE ======
+  const mobileToggle = document.getElementById('mobile-toggle');
+  const toggleLabel = document.getElementById('toggle-label');
+  const chatPanel = document.querySelector('.chat-panel');
+  const previewPanel = document.querySelector('.preview-panel');
+  let showingChat = true;
+
+  function applyMobileLayout() {
+    const isMobile = window.innerWidth <= 900;
+    if (isMobile) {
+      if (showingChat) {
+        chatPanel.classList.remove('panel-hidden');
+        previewPanel.classList.add('panel-hidden');
+        toggleLabel.textContent = 'Voir apercu';
+      } else {
+        chatPanel.classList.add('panel-hidden');
+        previewPanel.classList.remove('panel-hidden');
+        toggleLabel.textContent = 'Voir chat';
+      }
+    } else {
+      chatPanel.classList.remove('panel-hidden');
+      previewPanel.classList.remove('panel-hidden');
+    }
+  }
+
+  mobileToggle.addEventListener('click', function() {
+    showingChat = !showingChat;
+    applyMobileLayout();
+  });
+
+  window.addEventListener('resize', applyMobileLayout);
+  applyMobileLayout();
 })();
 </script>
 </body>
