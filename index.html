@@ -46,8 +46,8 @@
       --soft-bg-2:#fbfcfe;
       --u-w:650px;
       --u-shift:40px;
-      --para-before:6px;
-      --para-after:6px;
+      --para-before:8px;
+      --para-after:10px;
     }
     *{box-sizing:border-box;}
     html,body{height:100%;margin:0;font-family:var(--font);font-size:var(--body);line-height:var(--lh);color:var(--ink);background:#1a1d23;}
@@ -212,20 +212,20 @@
 
     .block-stack{display:flex;flex-direction:column;gap:0;}
     .block-item{
-      position:relative;margin-bottom:18pt;
+      position:relative;margin-bottom:22pt;
       --para-before:6px;--para-after:6px;
       break-inside:avoid-page;page-break-inside:avoid;
     }
     .block-item[data-tpl="tpl-plain-text"],
     .block-item[data-tpl="tpl-intro"],
     .block-item[data-tpl="tpl-body"],
-    .block-item[data-tpl="tpl-body-var1"]{--para-before:0pt;--para-after:8pt;}
+    .block-item[data-tpl="tpl-body-var1"]{--para-before:2pt;--para-after:10pt;}
     .block-item[data-tpl="tpl-body"],
-    .block-item[data-tpl="tpl-body-var1"]{margin-bottom:12pt;}
+    .block-item[data-tpl="tpl-body-var1"]{margin-bottom:16pt;}
     .block-item p,.block-item ul,.block-item ol{margin-top:var(--para-before);margin-bottom:var(--para-after);}
     .block-item p:first-child,.block-item ul:first-child,.block-item ol:first-child{margin-top:0;}
     .block-item p:last-child,.block-item ul:last-child,.block-item ol:last-child{margin-bottom:0;}
-    .block-item li+li{margin-top:3px;}
+    .block-item li+li{margin-top:6px;}
 
     /* ====== TYPOGRAPHY ====== */
     h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:0;}
@@ -233,24 +233,24 @@
     h2{font-size:var(--h2);line-height:var(--h2-lh);}
     h3{font-size:var(--h3);line-height:var(--h3-lh);}
     h4{font-size:var(--h4);line-height:var(--h4-lh);}
-    p{margin:0;text-align:left;line-height:var(--lh);}
-    li{text-align:left;line-height:var(--lh);}
+    p{margin:0;text-align:justify;text-align-last:left;line-height:var(--lh);}
+    li{text-align:justify;text-align-last:left;line-height:var(--lh);}
     .small{font-size:var(--body);}
     .muted{opacity:.82;}
     .i{font-style:italic;}
     .b{font-weight:800;}
-    .ta-left{text-align:left;}
-    .ta-center{text-align:center;}
-    .ta-justify{text-align:justify;}
+    .ta-left{text-align:left!important;text-align-last:left!important;}
+    .ta-center{text-align:center!important;text-align-last:center!important;}
+    .ta-justify{text-align:justify!important;text-align-last:left!important;}
     .mt-8{margin-top:8px;}.mt-12{margin-top:12px;}.mt-16{margin-top:16px;}
     .mt-20{margin-top:20px;}.mt-24{margin-top:24px;}.mt-28{margin-top:28px;}
     ul,ol{margin:0;padding:0;}
     .list{margin:0;padding-left:18px;}
-    .list li{margin-top:5px;}
+    .list li{margin-top:7px;}
     .list li:first-child{margin-top:0;}
-    .stack{--stack-gap:14px;display:flex;flex-direction:column;gap:var(--stack-gap);}
-    .stack--sm{--stack-gap:10px;}
-    .stack--xs{--stack-gap:8px;}
+    .stack{--stack-gap:18px;display:flex;flex-direction:column;gap:var(--stack-gap);}
+    .stack--sm{--stack-gap:12px;}
+    .stack--xs{--stack-gap:10px;}
     .row{--row-gap:14px;display:flex;align-items:center;gap:var(--row-gap);}
     .row--sm{--row-gap:10px;}
     .row--top{align-items:flex-start;}
@@ -355,7 +355,7 @@
     .frame--sand{border-color:var(--sand);}
 
     /* ====== SPLIT / COLUMNS — CORRIGÉ ====== */
-    .split-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+    .split-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
     .split-2--divider>*:nth-child(2){border-left:1px solid rgba(0,0,0,.10);padding-left:14px;}
     .split-2 p,.split-2 li{text-align:left !important;line-height:var(--lh);font-size:10pt;}
     .split-2>*{overflow:visible;min-width:0;}
@@ -389,7 +389,7 @@
     /* ====== TRIAD / CONDITIONS ====== */
     .triad-converge{border:1px solid var(--soft-border);border-radius:18px;background:linear-gradient(180deg,var(--soft-bg-1),var(--soft-bg-2));padding:14px;display:flex;flex-direction:column;gap:12px;}
     .triad-converge__items{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
-    .triad-converge__item{border-radius:14px;border:3px solid rgba(0,0,0,.08);background:#fff;padding:12px 14px;min-height:70px;overflow:visible;}
+    .triad-converge__item{border-radius:14px;border:3px solid rgba(0,0,0,.08);background:#fff;padding:14px 16px;min-height:70px;overflow:visible;}
     .triad-converge__item--orange{border-color:var(--orange);}
     .triad-converge__item--blue{border-color:var(--blue);}
     .triad-converge__item--sand{border-color:var(--sand);}
@@ -453,7 +453,7 @@
     }
     .diagram-split--2{grid-template-columns:repeat(2,minmax(0,1fr));}
     .diagram-split--3{grid-template-columns:repeat(3,minmax(0,1fr));}
-    .diagram-split__cell{min-width:0;padding:16px 18px;background:rgba(255,255,255,.92);overflow:visible;}
+    .diagram-split__cell{min-width:0;padding:18px 20px;background:rgba(255,255,255,.92);overflow:visible;}
     .diagram-split__cell+.diagram-split__cell{border-left:1px solid var(--soft-border);}
     .diagram-split__title{font-weight:900;margin-bottom:6px;line-height:1.25;font-size:10.5pt;}
     .diagram-split__cell p{margin:0;text-align:left;line-height:var(--lh);font-size:10pt;}
@@ -749,7 +749,7 @@
             </div>
             <div>
               <label>Modele</label>
-              <input id="api-model" type="text" value="claude-sonnet-4-20250514" />
+              <input id="api-model" type="text" value="claude-sonnet-4-6-20250514" />
             </div>
           </div>
         </details>
@@ -858,10 +858,11 @@
   const SYSTEM_PROMPT = `# SYSTEME — Assistant de legal design A4 avec Dairia Toolkit
 
 ## Ta mission
-Tu generes des infographies juridiques au format A4 en HTML pur.
+Tu generes des infographies juridiques au format A4 en HTML pur, avec un rendu professionnel et aesthetique.
 
 ## REGLES DE SORTIE (OBLIGATOIRES)
 Quand on te demande de generer une infographie, reponds UNIQUEMENT avec du HTML entre <INFOGRAPHIC> et </INFOGRAPHIC>.
+Ne mets RIEN d'autre dans ta reponse (pas de texte avant ni apres).
 
 ## STRUCTURE HTML OBLIGATOIRE
 Chaque page = un bloc:
@@ -877,19 +878,53 @@ La toute premiere page DOIT commencer par le logo Dairia:
   ${LOGO_SVG}
 </div>
 
-## REGLES TYPOGRAPHIQUES CRITIQUES
-1. JAMAIS de text-align:justify — utiliser TOUJOURS text-align:left partout.
-2. Line-height minimum de 1.35 partout — JAMAIS de line-height:1 sur du texte.
-3. JAMAIS de hyphens, word-break:break-all, ou overflow-wrap:break-word — ne JAMAIS couper les mots.
-4. Les mots ne doivent JAMAIS etre coupes en deux. Si un mot est trop long, il passe a la ligne suivante en entier.
-5. Les pills (pastilles) doivent avoir white-space:normal et word-break:normal.
-6. Dans les grilles (split-2, diagram-split, triad), le texte doit etre text-align:left.
-7. Privilegier des phrases courtes et claires. Pas de mots trop longs qui risquent de depasser.
-8. NE PAS ajouter de CSS inline avec hyphens, word-break ou overflow-wrap.
-9. Dans les colonnes (split-2, diagram-split), ecrire des textes COURTS (max 2-3 lignes par cellule). Si le texte est long, utiliser un bloc plein largeur a la place.
-10. Les encadres (extra-box) doivent contenir un texte qui tient sur 1 a 3 lignes max. Ne pas surcharger.
+## ===== REGLES DE MISE EN PAGE (CRITIQUES) =====
 
-## BLOCS DISPONIBLES
+### REMPLISSAGE DES PAGES
+C'est la regle la plus importante. Chaque page A4 DOIT etre bien remplie.
+- OBJECTIF: occuper au minimum 85% de la hauteur de la page (1123px).
+- NE JAMAIS laisser plus de 15% de blanc en bas d'une page.
+- Si une page est trop vide, AJOUTER du contenu: developper un point, ajouter un encadre "A retenir", une citation, un schema, un bloc explicatif supplementaire.
+- Si le contenu est trop court pour remplir la page, utiliser des blocs visuels (extra-box, highlight, body-frame) pour enrichir.
+- REGLE D'OR: il vaut mieux une page bien remplie avec du contenu pertinent qu'une page a moitie vide.
+
+### EQUILIBRE ENTRE PAGES
+- Repartir le contenu de facon EQUILIBREE entre les pages.
+- Eviter: une page surchargee suivie d'une page quasi-vide.
+- Si la derniere page est presque vide (<40% remplie), redistribuer le contenu depuis les pages precedentes.
+
+### AERATION ET ESPACEMENT
+- Laisser un espacement GENEREUX entre chaque bloc (les marges CSS s'en chargent).
+- Entre deux titres de section (h2), ajouter toujours au moins un bloc de contenu.
+- Apres un titre (tpl-title, tpl-subtitle), laisser un espace visuel (le CSS gere via margin).
+- Entre les paragraphes, privilegier des retours a la ligne naturels.
+- Ne JAMAIS coller deux blocs de texte brut (tpl-plain-text) l'un apres l'autre sans espacement.
+
+### TEXTE ET TYPOGRAPHIE
+- Le texte est JUSTIFIE par defaut (le CSS gere). Ne pas ajouter de text-align inline.
+- Line-height minimum de 1.35 partout.
+- JAMAIS de hyphens, word-break:break-all, ou overflow-wrap:break-word.
+- Les mots ne doivent JAMAIS etre coupes.
+- NE PAS ajouter de CSS inline sauf si absolument necessaire.
+- Phrases claires et bien construites. Privilegier 2-3 phrases par paragraphe plutot qu'un gros bloc.
+
+### LISTES — REGLES STRICTES
+Les listes sont un element cle du legal design. Elles doivent etre IMPECCABLES:
+- Toujours utiliser <ul class="list"> ou <ol class="list"> avec des <li>.
+- Chaque <li> doit contenir un texte clair, de 1 a 3 lignes max.
+- Pour les listes de conditions/etapes, preferer un bloc logic-flow ou tag-explain-set.
+- JAMAIS de listes imbriquees sur plus de 2 niveaux.
+- Si une liste a plus de 5 elements, envisager de la decouper en 2 blocs ou d'utiliser un diagramme.
+- Espacement regulier entre les items (le CSS gere avec li+li margin).
+- Quand tu enumeres des conditions ou etapes: utilise plutot des blocs visuels (timeline, logic-flow, tag-stack) qu'une simple <ul>.
+
+### COLONNES ET GRILLES
+- Dans split-2 et diagram-split: textes COURTS (max 3 lignes par cellule).
+- Si le contenu est long, utiliser un bloc plein largeur.
+- Les deux colonnes doivent avoir une longueur similaire.
+- Les encadres (extra-box) doivent contenir 1 a 4 lignes max.
+
+## ===== BLOCS DISPONIBLES =====
 Chaque bloc va dans: <div class="block-item" data-tpl="NOM">...</div>
 
 ### TITRES
@@ -901,10 +936,15 @@ Chaque bloc va dans: <div class="block-item" data-tpl="NOM">...</div>
 
 ### CORPS DE TEXTE
 - tpl-plain-text: <div class="plain-text"><p>TEXTE</p></div>
+  Utiliser pour du texte courant. Aerer avec des <p> separes (1 paragraphe = 2-3 phrases).
 - tpl-intro: <div><p>TEXTE</p><div class="midrule"></div></div>
+  Ideal pour introduire une section. Texte + filet decoratif.
 - tpl-body: <div><p>TEXTE</p><div class="bodyrule"></div></div>
 - tpl-body-var1: <div class="body-frame"><p>TEXTE</p></div>
-- tpl-extra-box: <div class="extra-box">TEXTE</div> (variantes: extra-box--blue/sand/green/red)
+  Encadre avec bordure degradee. Parfait pour mettre en valeur un point cle.
+- tpl-extra-box: <div class="extra-box"><p>TEXTE</p></div>
+  Encadre colore (variantes: extra-box--blue, extra-box--sand, extra-box--green, extra-box--red).
+  IDEAL pour "A retenir", "Important", "Attention", "Bon a savoir".
 - tpl-highlight: <div class="highlight"><p class="b">PHRASE CLE</p><p class="muted">Precision</p></div>
 
 ### CITATIONS
@@ -913,18 +953,21 @@ Chaque bloc va dans: <div class="block-item" data-tpl="NOM">...</div>
 
 ### TIMELINE
 - tpl-timeline-v: <section class="timeline-v">... timeline-v__item ...</section>
+  Preferer pour les processus, procedures, etapes chronologiques.
 - tpl-timeline-h: <section class="timeline-h">... timeline-h__item ...</section>
+  Horizontal. Max 4 etapes.
 
 ### DIAGRAMMES
 - tpl-diagram-split-2: <section class="diagram-split diagram-split--2">2 cellules</section>
 - tpl-diagram-split-3: idem 3 cellules
+  Pour comparer, opposer, categoriser.
 
 ### CONDITIONS/LOGIQUE
-- tpl-pill-triad-equals: triad-converge (3 conditions + resultat)
-- tpl-do-dont: split-2 avec A retenir / A eviter (listes)
-- tpl-logic-chain-3/4: logic-flow (etapes logiques)
-- tpl-tag-explain-set: tag-stack (tags colores avec explication)
-- tpl-chips-3: row de pills avec + entre
+- tpl-pill-triad-equals: triad-converge (3 conditions + resultat). IDEAL pour conditions cumulatives.
+- tpl-do-dont: split-2 avec A retenir / A eviter (listes). Tres visuel.
+- tpl-logic-chain-3/4: logic-flow (etapes logiques). PREFERER a une liste simple.
+- tpl-tag-explain-set: tag-stack (tags colores avec explication). Parfait pour conditions, categories.
+- tpl-chips-3: row de pills avec + entre. Pour conditions cumulatives simples.
 
 ### EMOJI/ICONES
 - tpl-emo-quote: emoji + texte + reference
@@ -934,14 +977,24 @@ Chaque bloc va dans: <div class="block-item" data-tpl="NOM">...</div>
 Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 🤝
 
 ## PAGINATION
-- Max 6-8 blocs par page selon la taille
-- Si le contenu deborde, creer une nouvelle page
-- Chaque page a son numero en bas
+- Viser 5-7 blocs par page selon leur taille.
+- Chaque page doit paraitre PLEINE et equilibree.
+- Si le contenu deborde, creer une nouvelle page plutot que de comprimer.
+- Chaque page a son numero en bas.
+- La derniere page doit aussi etre bien remplie.
+
+## STRATEGIE DE CONTENU
+Quand tu recois du contenu juridique a transformer:
+1. Identifier les grandes parties/themes.
+2. Pour chaque partie, choisir les blocs les plus VISUELS et LISIBLES.
+3. Alterner les types de blocs pour eviter la monotonie (pas 3 plain-text d'affilee).
+4. Utiliser les blocs visuels (timeline, logic-flow, tag-stack, triad, diagram-split) des que possible.
+5. Ajouter des encadres "A retenir" ou "Important" pour remplir et structurer.
 
 ## FIDELITE
-- Pas d'invention de faits/dates/montants
-- Citations en verbatim
-- Francais`;
+- Pas d'invention de faits/dates/montants.
+- Citations en verbatim.
+- Francais.`;
 
   // ====== HELPERS ======
   function addMessage(type, content) {
@@ -1081,12 +1134,40 @@ Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 �
       conversationHistory.push({role: 'assistant', content: aiResponse});
       const htmlMatch = aiResponse.match(/<INFOGRAPHIC>([\s\S]*?)<\/INFOGRAPHIC>/);
       if (htmlMatch) {
-        const htmlContent = htmlMatch[1].trim();
+        let htmlContent = htmlMatch[1].trim();
         const textBefore = aiResponse.substring(0, aiResponse.indexOf('<INFOGRAPHIC>')).trim();
         const textAfter = aiResponse.substring(aiResponse.indexOf('</INFOGRAPHIC>') + 15).trim();
         if (textBefore) addMessage('ai', formatAIText(textBefore));
         renderInfographic(htmlContent);
-        addMessage('system', 'Infographie generee ! Consultez l\'apercu a droite.');
+        addMessage('system', 'Infographie generee — verification qualite en cours...');
+
+        // ====== AGENTIC LOOP: self-review up to 2 passes ======
+        let reviewPass = 0;
+        const maxPasses = 2;
+        while (reviewPass < maxPasses) {
+          reviewPass++;
+          genOverlay.hidden = false;
+          genStatus.textContent = 'Auto-review (passe ' + reviewPass + '/' + maxPasses + ')...';
+          try {
+            const improved = await selfReviewInfographic(htmlContent, key, provider, model);
+            if (improved) {
+              htmlContent = improved;
+              renderInfographic(htmlContent);
+              addMessage('system', 'Amelioration appliquee (passe ' + reviewPass + ')');
+              // Update conversation history with improved version
+              conversationHistory[conversationHistory.length - 1].content =
+                aiResponse.replace(/<INFOGRAPHIC>[\s\S]*?<\/INFOGRAPHIC>/, '<INFOGRAPHIC>' + htmlContent + '</INFOGRAPHIC>');
+            } else {
+              addMessage('system', 'Qualite validee' + (reviewPass > 1 ? ' apres ' + reviewPass + ' passes' : '') + ' ✓');
+              break;
+            }
+          } catch(reviewErr) {
+            // Silent fail on review — the initial generation is already shown
+            break;
+          }
+        }
+        genOverlay.hidden = true;
+
         if (textAfter) addMessage('ai', formatAIText(textAfter));
       } else {
         addMessage('ai', formatAIText(aiResponse));
@@ -1110,7 +1191,7 @@ Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 �
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
-        model: model || 'claude-sonnet-4-20250514',
+        model: model || 'claude-sonnet-4-6-20250514',
         max_tokens: 16000,
         system: SYSTEM_PROMPT,
         messages: messages.map(m => ({role: m.role, content: m.content}))
@@ -1149,6 +1230,22 @@ Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 �
       .replace(/\n/g, '<br>');
   }
 
+  // ====== SELF-REVIEW PROMPT ======
+  const REVIEW_PROMPT = `Tu es un expert en quality assurance de legal design. On te donne le HTML d'une infographie A4 generee.
+
+ANALYSE chaque page et verifie:
+1. REMPLISSAGE: chaque page doit etre remplie a 85%+ (la hauteur A4 = 1123px, padding haut/bas ~112px, donc ~1011px de contenu utile). Compte les blocs et estime si la page est bien remplie.
+2. EQUILIBRE: les pages doivent avoir des quantites de contenu similaires. Pas de page surchargee suivie d'une page vide.
+3. LISTES: les <ul>/<ol> doivent utiliser class="list", les <li> doivent etre clairs et espaces.
+4. VARIETE: pas plus de 2 blocs du meme type consecutifs (ex: pas 3 plain-text d'affilee).
+5. AERATION: espacement suffisant entre blocs, pas de texte colle.
+6. DERNIERE PAGE: ne doit PAS etre presque vide.
+
+Si tu trouves des problemes, CORRIGE le HTML et renvoie la version amelioree COMPLETE entre <INFOGRAPHIC> et </INFOGRAPHIC>.
+Si tout est bon, reponds exactement: LGTM
+
+IMPORTANT: Si tu corriges, renvoie l'INTEGRALITE du HTML corrige, pas juste les morceaux modifies.`;
+
   // ====== RENDER ======
   function renderInfographic(html) {
     pagesRoot.innerHTML = html;
@@ -1165,6 +1262,47 @@ Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 �
     });
     updatePreview();
     previewScroll.scrollTop = 0;
+  }
+
+  // ====== AGENTIC SELF-REVIEW ======
+  async function selfReviewInfographic(html, key, provider, model) {
+    const reviewMessages = [
+      {role: 'user', content: 'Voici le HTML de l\'infographie a verifier et corriger si necessaire:\n\n' + html}
+    ];
+    let reviewResponse = '';
+    if (provider === 'anthropic') {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: model || 'claude-sonnet-4-6-20250514',
+          max_tokens: 16000,
+          system: REVIEW_PROMPT,
+          messages: reviewMessages
+        })
+      });
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      reviewResponse = data.content[0].text;
+    } else {
+      const msgs = [{role: 'system', content: REVIEW_PROMPT}, ...reviewMessages];
+      const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key},
+        body: JSON.stringify({model: model || 'gpt-4o', max_tokens: 16000, messages: msgs})
+      });
+      if (!resp.ok) return null;
+      const data = await resp.json();
+      reviewResponse = data.choices[0].message.content;
+    }
+    if (reviewResponse.trim() === 'LGTM') return null;
+    const match = reviewResponse.match(/<INFOGRAPHIC>([\s\S]*?)<\/INFOGRAPHIC>/);
+    return match ? match[1].trim() : null;
   }
 
   // ====== EXPORTS ======
@@ -1248,7 +1386,7 @@ Palette: ⚖ 📌 🧾 ✅ ⚠ ⛔ 🔎 🧠 ⏱ 🔗 🗂 📋 💡 🏛 📊 �
   });
 
   apiProvider.addEventListener('change', function() {
-    apiModel.value = this.value === 'openai' ? 'gpt-4o' : 'claude-sonnet-4-20250514';
+    apiModel.value = this.value === 'openai' ? 'gpt-4o' : 'claude-sonnet-4-6-20250514';
   });
 
   // ====== PERSISTENT CONFIG (localStorage + cookie fallback) ======
