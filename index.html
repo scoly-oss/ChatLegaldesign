@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chat LegalDesign — Générateur d'infographies</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -12,12 +13,12 @@
     /* ====== DAIRIA TOOLKIT CSS V2 (corrigé) ====== */
     :root{
       --ink:#000000;
-      --blue:#1d617a;
-      --orange:#ff914d;
+      --blue:#1e2d3d;
+      --orange:#e8842c;
       --sand:#e9d3bb;
       --green:#2f9e44;
       --red:#e03131;
-      --page-bg:#eef0f3;
+      --page-bg:#f8f8f6;
       --paper:#ffffff;
       --a4-w:794px;
       --a4-h:1123px;
@@ -50,7 +51,7 @@
       --para-after:10px;
     }
     *{box-sizing:border-box;}
-    html,body{height:100%;margin:0;font-family:var(--font);font-size:var(--body);line-height:var(--lh);color:var(--ink);background:#1a1d23;}
+    html,body{height:100%;margin:0;font-family:var(--font);font-size:var(--body);line-height:var(--lh);color:var(--ink);background:var(--page-bg);}
 
     /* ====== APP LAYOUT ====== */
     .app-layout{
@@ -80,17 +81,18 @@
         cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.35);gap:8px;align-items:center;
         min-height:48px;
       }
-      .mobile-toggle:hover{background:#2a7a9a;}
+      .mobile-toggle:hover{background:#e8842c;}
       .mobile-toggle svg{width:20px;height:20px;flex-shrink:0;}
     }
 
     /* ====== CHAT PANEL ====== */
     .chat-panel{
-      display:flex;flex-direction:column;background:#22252b;
+      display:flex;flex-direction:column;background:#1e2d3d;
       border-right:1px solid rgba(255,255,255,.08);overflow:hidden;
     }
     .chat-header{
-      padding:16px 20px;background:linear-gradient(135deg,#1d617a,#2a7a9a);
+      padding:16px 20px;background:linear-gradient(135deg,#1e2d3d,#2a3d54);
+      border-bottom:2px solid #e8842c;
       display:flex;align-items:center;gap:12px;flex-shrink:0;
     }
     .chat-header svg{width:36px;height:36px;}
@@ -130,8 +132,8 @@
     .chat-input-row textarea:focus{outline:none;border-color:var(--blue);}
     .chat-input-row textarea::placeholder{color:rgba(255,255,255,.3);}
     .chat-btn{width:42px;height:42px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
-    .chat-btn-send{background:var(--blue);color:#fff;}
-    .chat-btn-send:hover{background:#2a7a9a;}
+    .chat-btn-send{background:var(--orange);color:#fff;}
+    .chat-btn-send:hover{background:#d4741f;}
     .chat-btn-send:disabled{opacity:.4;cursor:not-allowed;}
     .chat-btn-file{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);}
     .chat-btn-file:hover{background:rgba(255,255,255,.14);color:#fff;}
@@ -160,9 +162,9 @@
     .toolbar-btn:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
     .toolbar-btn:active{transform:translateY(0);}
     .toolbar-btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
-    .toolbar-btn-primary:hover{background:#2a7a9a;border-color:#2a7a9a;color:#fff;}
-    .toolbar-btn-orange{background:var(--orange);color:#111;border-color:var(--orange);}
-    .toolbar-btn-orange:hover{background:#ff7a2e;border-color:#ff7a2e;color:#111;}
+    .toolbar-btn-primary:hover{background:#2a3d54;border-color:#2a3d54;color:#fff;}
+    .toolbar-btn-orange{background:var(--orange);color:#fff;border-color:var(--orange);}
+    .toolbar-btn-orange:hover{background:#d4741f;border-color:#d4741f;color:#fff;}
     .preview-scroll{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px;}
     .preview-scroll::-webkit-scrollbar{width:8px;}
     .preview-scroll::-webkit-scrollbar-track{background:transparent;}
@@ -719,17 +721,81 @@
       .page img,.page svg{max-width:100%;height:auto;}
       #pages-root{width:100%;max-width:100%;}
     }
+
+    /* ====== AUTH MODAL ====== */
+    .auth-overlay{position:fixed;inset:0;background:var(--page-bg);display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
+    .auth-overlay[hidden]{display:none;}
+    .auth-card{background:#fff;border-radius:20px;padding:48px 40px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.12);}
+    .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+    .auth-logo svg{width:40px;height:40px;}
+    .auth-logo-text{display:flex;flex-direction:column;}
+    .auth-logo-text strong{font-size:18px;font-weight:800;color:var(--blue);}
+    .auth-logo-text span{font-size:11px;color:#6b7280;}
+    .auth-card h2{font-size:22px;font-weight:800;color:var(--blue);margin:0 0 8px;}
+    .auth-card p{font-size:13px;color:#6b7280;margin:0 0 28px;line-height:1.5;}
+    .auth-field{margin-bottom:16px;}
+    .auth-field label{display:block;font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px;}
+    .auth-field input{width:100%;padding:12px 14px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;font-family:inherit;transition:border-color .15s;outline:none;}
+    .auth-field input:focus{border-color:var(--orange);}
+    .auth-btn{width:100%;padding:14px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:800;font-family:inherit;cursor:pointer;transition:background .15s;margin-top:8px;}
+    .auth-btn:hover{background:#d4741f;}
+    .auth-btn:disabled{opacity:.5;cursor:not-allowed;}
+    .auth-error{background:rgba(224,49,49,.08);border:1px solid rgba(224,49,49,.2);color:#e03131;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:12px;display:none;}
+    .auth-error.visible{display:block;}
+    .auth-divider{text-align:center;font-size:12px;color:#6b7280;margin:16px 0;position:relative;}
+    .auth-divider::before,.auth-divider::after{content:"";position:absolute;top:50%;width:40%;height:1px;background:#e5e7eb;}
+    .auth-divider::before{left:0;} .auth-divider::after{right:0;}
+    .auth-switch{text-align:center;font-size:13px;color:#6b7280;margin-top:16px;}
+    .auth-switch a{color:var(--orange);font-weight:700;cursor:pointer;text-decoration:none;}
+    .auth-switch a:hover{text-decoration:underline;}
+    .auth-header-bar{display:flex;justify-content:flex-end;padding:10px 16px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+    .auth-user-info{display:flex;align-items:center;gap:8px;}
+    .auth-user-email{font-size:11px;color:rgba(255,255,255,.6);}
+    .auth-logout-btn{padding:4px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:11px;font-family:inherit;cursor:pointer;}
+    .auth-logout-btn:hover{background:rgba(255,255,255,.1);}
   </style>
 </head>
 <body>
+  <!-- AUTH MODAL -->
+  <div class="auth-overlay" id="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="#fff" stroke="#1e2d3d" stroke-width="8"/><line x1="52" y1="42" x2="52" y2="138" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="58" r="10" fill="#e8842c"/><circle cx="52" cy="90" r="10" fill="#fff" stroke="#1e2d3d" stroke-width="6"/><circle cx="52" cy="122" r="10" fill="#fff" stroke="#1e2d3d" stroke-width="6"/><line x1="78" y1="60" x2="140" y2="60" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/><line x1="78" y1="92" x2="150" y2="92" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity=".9"/><line x1="78" y1="150" x2="150" y2="150" stroke="#e8842c" stroke-width="10" stroke-linecap="round"/></svg>
+        <div class="auth-logo-text">
+          <strong>DAIRIA</strong>
+          <span>Chat LegalDesign</span>
+        </div>
+      </div>
+      <h2 id="auth-title">Connexion</h2>
+      <p id="auth-subtitle">Accédez à votre espace DAIRIA pour générer vos infographies juridiques.</p>
+      <div class="auth-field">
+        <label for="auth-email">Adresse e-mail</label>
+        <input type="email" id="auth-email" placeholder="vous@exemple.com" autocomplete="email" />
+      </div>
+      <div class="auth-field">
+        <label for="auth-password">Mot de passe</label>
+        <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="auth-btn" id="auth-submit-btn">Se connecter</button>
+      <div class="auth-error" id="auth-error"></div>
+      <div class="auth-switch">Pas encore de compte ? <a id="auth-toggle-link">Créer un compte</a></div>
+    </div>
+  </div>
+
   <div class="app-layout">
     <!-- CHAT PANEL -->
     <div class="chat-panel">
       <div class="chat-header">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="#fff" stroke="#1d617a" stroke-width="8"/><line x1="52" y1="42" x2="52" y2="138" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="58" r="10" fill="#ff914d"/><circle cx="52" cy="90" r="10" fill="#fff" stroke="#1d617a" stroke-width="6"/><circle cx="52" cy="122" r="10" fill="#fff" stroke="#1d617a" stroke-width="6"/><line x1="78" y1="60" x2="140" y2="60" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/><line x1="78" y1="92" x2="150" y2="92" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity=".9"/><line x1="78" y1="124" x2="132" y2="124" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity=".75"/><line x1="78" y1="150" x2="150" y2="150" stroke="#ff914d" stroke-width="10" stroke-linecap="round"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="#fff" stroke="#1e2d3d" stroke-width="8"/><line x1="52" y1="42" x2="52" y2="138" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="58" r="10" fill="#e8842c"/><circle cx="52" cy="90" r="10" fill="#fff" stroke="#1e2d3d" stroke-width="6"/><circle cx="52" cy="122" r="10" fill="#fff" stroke="#1e2d3d" stroke-width="6"/><line x1="78" y1="60" x2="140" y2="60" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/><line x1="78" y1="92" x2="150" y2="92" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity=".9"/><line x1="78" y1="124" x2="132" y2="124" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity=".75"/><line x1="78" y1="150" x2="150" y2="150" stroke="#e8842c" stroke-width="10" stroke-linecap="round"/></svg>
         <div>
           <h1>Chat LegalDesign</h1>
           <p>Générateur d'infographies juridiques</p>
+        </div>
+      </div>
+      <div class="auth-header-bar" id="auth-header-bar" style="display:none;">
+        <div class="auth-user-info">
+          <span class="auth-user-email" id="auth-user-email"></span>
+          <button class="auth-logout-btn" id="auth-logout-btn">Déconnexion</button>
         </div>
       </div>
       <div class="chat-config">
@@ -812,6 +878,130 @@
   </div>
 
 <script>
+// ====== SUPABASE AUTH ======
+(function() {
+  'use strict';
+
+  const SUPABASE_URL = 'https://noqzwkkdfpbmglewsozo.supabase.co';
+  // Anon key is a public key — safe to expose in client-side code
+  const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || '';
+
+  const authOverlay = document.getElementById('auth-overlay');
+  const authEmail = document.getElementById('auth-email');
+  const authPassword = document.getElementById('auth-password');
+  const authSubmitBtn = document.getElementById('auth-submit-btn');
+  const authError = document.getElementById('auth-error');
+  const authTitle = document.getElementById('auth-title');
+  const authSubtitle = document.getElementById('auth-subtitle');
+  const authToggleLink = document.getElementById('auth-toggle-link');
+  const authHeaderBar = document.getElementById('auth-header-bar');
+  const authUserEmail = document.getElementById('auth-user-email');
+  const authLogoutBtn = document.getElementById('auth-logout-btn');
+
+  let supabase = null;
+  let isSignUp = false;
+
+  function showAuthError(msg) {
+    authError.textContent = msg;
+    authError.classList.add('visible');
+  }
+  function clearAuthError() {
+    authError.textContent = '';
+    authError.classList.remove('visible');
+  }
+
+  function onAuthSuccess(user) {
+    authOverlay.hidden = true;
+    authHeaderBar.style.display = 'flex';
+    authUserEmail.textContent = user.email;
+  }
+
+  function onLogout() {
+    authOverlay.hidden = false;
+    authHeaderBar.style.display = 'none';
+    authUserEmail.textContent = '';
+    authPassword.value = '';
+    clearAuthError();
+  }
+
+  if (!SUPABASE_ANON_KEY || !window.supabase) {
+    // Supabase not configured — bypass auth and show app
+    authOverlay.hidden = true;
+    return;
+  }
+
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Check existing session
+  supabase.auth.getSession().then(function(ref) {
+    var session = ref.data && ref.data.session;
+    if (session && session.user) {
+      onAuthSuccess(session.user);
+    }
+  });
+
+  // Listen to auth changes
+  supabase.auth.onAuthStateChange(function(event, session) {
+    if (event === 'SIGNED_IN' && session && session.user) {
+      onAuthSuccess(session.user);
+    } else if (event === 'SIGNED_OUT') {
+      onLogout();
+    }
+  });
+
+  authToggleLink.addEventListener('click', function() {
+    isSignUp = !isSignUp;
+    clearAuthError();
+    if (isSignUp) {
+      authTitle.textContent = 'Créer un compte';
+      authSubtitle.textContent = 'Rejoignez l\'écosystème DAIRIA.';
+      authSubmitBtn.textContent = 'Créer mon compte';
+      authToggleLink.textContent = 'J\'ai déjà un compte';
+    } else {
+      authTitle.textContent = 'Connexion';
+      authSubtitle.textContent = 'Accédez à votre espace DAIRIA pour générer vos infographies juridiques.';
+      authSubmitBtn.textContent = 'Se connecter';
+      authToggleLink.textContent = 'Créer un compte';
+    }
+  });
+
+  authSubmitBtn.addEventListener('click', async function() {
+    clearAuthError();
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+    if (!email || !password) { showAuthError('Veuillez remplir tous les champs.'); return; }
+    authSubmitBtn.disabled = true;
+    authSubmitBtn.textContent = 'En cours...';
+    try {
+      let result;
+      if (isSignUp) {
+        result = await supabase.auth.signUp({ email, password });
+      } else {
+        result = await supabase.auth.signInWithPassword({ email, password });
+      }
+      if (result.error) {
+        showAuthError(result.error.message);
+      } else if (isSignUp && result.data && result.data.user && !result.data.session) {
+        showAuthError('Vérifiez votre e-mail pour confirmer votre compte.');
+      }
+    } catch(e) {
+      showAuthError('Erreur de connexion. Vérifiez votre connexion internet.');
+    }
+    authSubmitBtn.disabled = false;
+    authSubmitBtn.textContent = isSignUp ? 'Créer mon compte' : 'Se connecter';
+  });
+
+  authPassword.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') authSubmitBtn.click();
+  });
+
+  authLogoutBtn.addEventListener('click', async function() {
+    if (supabase) await supabase.auth.signOut();
+  });
+})();
+</script>
+
+<script>
 (function(){
   'use strict';
 
@@ -837,20 +1027,20 @@
   // ====== LOGO SVG (Dairia) ======
   const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 240" role="img" style="width:220px;height:auto;">
     <g transform="translate(30,30)">
-      <rect x="0" y="0" width="180" height="180" rx="36" fill="#ffffff" stroke="#1d617a" stroke-width="8"/>
-      <line x1="52" y1="42" x2="52" y2="138" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/>
-      <circle cx="52" cy="58" r="10" fill="#ff914d"/>
-      <circle cx="52" cy="90" r="10" fill="#ffffff" stroke="#1d617a" stroke-width="6"/>
-      <circle cx="52" cy="122" r="10" fill="#ffffff" stroke="#1d617a" stroke-width="6"/>
-      <line x1="78" y1="60" x2="140" y2="60" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/>
-      <line x1="78" y1="92" x2="150" y2="92" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
-      <line x1="78" y1="124" x2="132" y2="124" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
-      <line x1="78" y1="150" x2="150" y2="150" stroke="#ff914d" stroke-width="10" stroke-linecap="round"/>
+      <rect x="0" y="0" width="180" height="180" rx="36" fill="#ffffff" stroke="#1e2d3d" stroke-width="8"/>
+      <line x1="52" y1="42" x2="52" y2="138" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="52" cy="58" r="10" fill="#e8842c"/>
+      <circle cx="52" cy="90" r="10" fill="#ffffff" stroke="#1e2d3d" stroke-width="6"/>
+      <circle cx="52" cy="122" r="10" fill="#ffffff" stroke="#1e2d3d" stroke-width="6"/>
+      <line x1="78" y1="60" x2="140" y2="60" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/>
+      <line x1="78" y1="92" x2="150" y2="92" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+      <line x1="78" y1="124" x2="132" y2="124" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
+      <line x1="78" y1="150" x2="150" y2="150" stroke="#e8842c" stroke-width="10" stroke-linecap="round"/>
     </g>
     <g transform="translate(250,92)">
-      <text x="0" y="0" font-size="56" font-weight="750" fill="#1d617a" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">Dairia</text>
-      <text x="210" y="0" font-size="56" font-weight="750" fill="#ff914d" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">legaldesign</text>
-      <text x="0" y="50" font-size="22" font-weight="550" fill="#1d617a" opacity="0.65" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">infographies juridiques</text>
+      <text x="0" y="0" font-size="56" font-weight="750" fill="#1e2d3d" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">Dairia</text>
+      <text x="210" y="0" font-size="56" font-weight="750" fill="#e8842c" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">legaldesign</text>
+      <text x="0" y="50" font-size="22" font-weight="550" fill="#1e2d3d" opacity="0.65" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">infographies juridiques</text>
     </g>
   </svg>`;
 
@@ -997,6 +1187,15 @@ Quand tu recois du contenu juridique a transformer:
 - Francais.`;
 
   // ====== HELPERS ======
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function addMessage(type, content) {
     const div = document.createElement('div');
     div.className = 'msg msg-' + type;
@@ -1008,7 +1207,8 @@ Quand tu recois du contenu juridique a transformer:
   function addFileMessage(name) {
     const div = document.createElement('div');
     div.className = 'msg msg-file';
-    div.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> ' + name;
+    const safeName = escapeHtml(name);
+    div.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> ' + safeName;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
@@ -1077,7 +1277,7 @@ Quand tu recois du contenu juridique a transformer:
       uploadedFiles.push({name: file.name, content: text.substring(0, 50000)});
       const chip = document.createElement('div');
       chip.className = 'file-chip';
-      chip.innerHTML = file.name + ' <button onclick="this.parentElement.remove()">&times;</button>';
+      chip.innerHTML = escapeHtml(file.name) + ' <button onclick="this.parentElement.remove()">&times;</button>';
       fileChips.appendChild(chip);
     }
     fileInput.value = '';
@@ -1114,7 +1314,7 @@ Quand tu recois du contenu juridique a transformer:
       uploadedFiles = [];
       fileChips.innerHTML = '';
     }
-    addMessage('user', text || '(Documents charges)');
+    addMessage('user', escapeHtml(text) || '(Documents chargés)');
     chatInput.value = '';
     chatInput.style.height = 'auto';
     conversationHistory.push({role: 'user', content: userContent});
@@ -1174,7 +1374,7 @@ Quand tu recois du contenu juridique a transformer:
       }
     } catch(err) {
       hideTyping();
-      addMessage('system', 'Erreur : ' + err.message);
+      addMessage('system', 'Erreur : ' + escapeHtml(err.message));
     }
     isGenerating = false;
     btnSend.disabled = false;
@@ -1406,14 +1606,11 @@ IMPORTANT: Si tu corriges, renvoie l'INTEGRALITE du HTML corrige, pas juste les 
     return null;
   }
 
-  // Default API key (obfuscated)
-  const DEFAULT_KEY = atob('c2stYW50LWFwaTAzLUI4ZUpfX0x2ak' + '1hNk55azljQ21HQnViWWI4djczWVBP' + 'cFRROFJ3TkFCSzZiTkpQLXhBd2QzSF' + 'REcWM4d21xblFEQnh1Wm5FMVBqUTM2' + 'Z0ZmMkMwdmhRLTBxLXBrd0FB');
-
-  // Load saved config or use defaults
+  // Load saved config
   const savedKey = loadConfig('chatld_key');
   const savedProv = loadConfig('chatld_prov');
   const savedMod = loadConfig('chatld_mod');
-  apiKey.value = savedKey || DEFAULT_KEY;
+  apiKey.value = savedKey || '';
   if (savedProv) apiProvider.value = savedProv;
   if (savedMod) apiModel.value = savedMod;
 
