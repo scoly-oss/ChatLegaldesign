@@ -756,11 +756,12 @@
       </div>
       <div class="chat-messages" id="chat-messages">
         <div class="msg msg-system">Bienvenue ! Decrivez l'infographie souhaitee ou chargez un document.</div>
-        <div class="msg msg-ai">Bonjour ! Je suis votre assistant LegalDesign. Vous pouvez :
-<br><br>1. <b>Charger un document</b> (PDF, DOCX, TXT) avec le bouton fichier
-<br>2. <b>Me decrire</b> ce que vous souhaitez comme infographie
-<br>3. <b>Preciser</b> le nombre de pages, le style, les points a mettre en avant
-<br><br>Je genere automatiquement les infographies au format A4 avec votre design system Dairia, logo inclus.</div>
+        <div class="msg msg-ai">Bonjour ! Je suis votre assistant LegalDesign avec accès aux sources juridiques officielles. Je peux :
+<br><br>⚖ <b>Rechercher dans Legifrance</b> — codes, lois, décrets, jurisprudence (Cass., CE), conventions collectives
+<br>📋 <b>Consulter le BOSS</b> — protection sociale, cotisations, assurance maladie, retraite
+<br>🔗 <b>Citer avec références complètes</b> — numéro d'article + lien officiel
+<br>📄 <b>Générer des infographies A4</b> à partir de vos documents ou questions juridiques
+<br><br>Posez votre question juridique ou chargez un document (PDF, DOCX) pour commencer.</div>
       </div>
       <div class="chat-input-area">
         <div class="file-chips" id="file-chips"></div>
@@ -994,7 +995,196 @@ Quand tu recois du contenu juridique a transformer:
 ## FIDELITE
 - Pas d'invention de faits/dates/montants.
 - Citations en verbatim.
-- Francais.`;
+- Francais.
+
+## RECHERCHE JURIDIQUE — CAPACITES
+Tu as acces a des outils de recherche dans les sources officielles francaises.
+Utilise-les systematiquement quand la question porte sur une regle de droit precise.
+
+### Outils disponibles
+- **rechercher_legifrance** : recherche dans Legifrance
+  - fond CODE_DATE : codes en vigueur (Code du travail, Code civil, Code de la securite sociale...)
+  - fond LODA_DATE : lois, ordonnances, decrets
+  - fond JURI : jurisprudence judiciaire (Cour de cassation)
+  - fond CETAT : jurisprudence administrative (Conseil d'Etat, CAA, TA)
+  - fond KALI : conventions collectives nationales (CCN)
+  - fond CIRC : circulaires ministerielles
+- **obtenir_article** : recupere le texte integral d'un article Legifrance par son ID
+- **rechercher_boss** : recherche dans le BOSS (Bulletin Officiel de la Securite Sociale)
+
+### Quand utiliser les outils
+- L'utilisateur pose une question sur une regle juridique precise -> chercher
+- L'utilisateur mentionne un article ou une juridiction -> verifier
+- L'utilisateur demande une infographie sur un sujet juridique -> chercher les textes sources
+
+### Format citations OBLIGATOIRE
+Apres chaque recherche, cite avec ce format exact dans tes reponses :
+**[Article L. 1234-1 du Code du travail](https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI...)**
+Pour la jurisprudence : **[Cass. soc., 12 janv. 2023, n° 21-12345](https://www.legifrance.gouv.fr/juri/id/...)**
+Pour les CCN : **[CCN Metallurgie — Art. X](https://www.legifrance.gouv.fr/conv_coll/id/...)**
+Pour le BOSS : **[BOSS — Salaires, §123](https://boss.gouv.fr/...)**`;
+
+  // ====== LEGAL TOOLS DEFINITION ======
+  const LEGAL_TOOLS = [
+    {
+      name: 'rechercher_legifrance',
+      description: 'Recherche dans les textes juridiques officiels français via Legifrance (codes, lois, jurisprudence, conventions collectives, circulaires). Retourne les résultats avec identifiants et extraits.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Termes de recherche (ex: "licenciement économique préavis", "article L1237-19")' },
+          fond: {
+            type: 'string',
+            enum: ['CODE_DATE', 'LODA_DATE', 'JURI', 'CETAT', 'KALI', 'CIRC'],
+            description: 'Fonds documentaire: CODE_DATE=Codes en vigueur, LODA_DATE=Lois/Ordonnances/Décrets, JURI=Jurisprudence judiciaire (Cass.), CETAT=Jurisprudence administrative (CE), KALI=Conventions collectives, CIRC=Circulaires'
+          },
+          pageSize: { type: 'number', description: 'Nombre de résultats (1-10, défaut 5)' }
+        },
+        required: ['query', 'fond']
+      }
+    },
+    {
+      name: 'obtenir_article',
+      description: 'Récupère le texte intégral d\'un article juridique Legifrance par son identifiant (LEGIARTI..., JORFTEXT..., etc.). Utiliser après une recherche pour obtenir le texte complet.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'Identifiant Legifrance (ex: LEGIARTI000006900846, JURITEXT000007587397)' }
+        },
+        required: ['id']
+      }
+    },
+    {
+      name: 'rechercher_boss',
+      description: 'Recherche dans le BOSS (Bulletin Officiel de la Sécurité Sociale) — référence officielle pour le droit de la protection sociale, cotisations, assurance maladie, retraite, accidents du travail.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Termes de recherche (ex: "taux cotisations patronales", "indemnités journalières calcul")' }
+        },
+        required: ['query']
+      }
+    }
+  ];
+
+  // ====== TOOL EXECUTION ======
+  function legifranceUrl(id, fond) {
+    if (!id) return 'https://www.legifrance.gouv.fr';
+    if (fond === 'JURI') return `https://www.legifrance.gouv.fr/juri/id/${id}`;
+    if (fond === 'CETAT') return `https://www.legifrance.gouv.fr/ceta/id/${id}`;
+    if (fond === 'KALI') return `https://www.legifrance.gouv.fr/conv_coll/id/${id}`;
+    if (fond === 'CIRC') return `https://www.legifrance.gouv.fr/circulaire/id/${id}`;
+    if (fond === 'LODA_DATE') return `https://www.legifrance.gouv.fr/loda/id/${id}`;
+    // CODE_DATE or article
+    if (id.startsWith('LEGIARTI')) return `https://www.legifrance.gouv.fr/codes/article_lc/${id}`;
+    return `https://www.legifrance.gouv.fr/search/#all?query=${encodeURIComponent(id)}`;
+  }
+
+  function formatLegiResult(item, fond) {
+    const num = item.num || item.article?.num || '';
+    const title = item.title || item.article?.title || item.titre || '';
+    const id = item.id || item.article?.id || '';
+    const excerpt = (item.text || item.article?.content || item.resume || '').replace(/<[^>]+>/g, '').slice(0, 400);
+    const url = legifranceUrl(id, fond);
+    return { num, title, id, excerpt, url };
+  }
+
+  async function executeTool(name, input) {
+    if (name === 'rechercher_legifrance') {
+      const { query, fond = 'CODE_DATE', pageSize = 5 } = input;
+      addMessage('system', `🔎 Recherche Legifrance [${fond}] : « ${query} »…`);
+      try {
+        const resp = await fetch('/api/legal/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, fond, pageSize })
+        });
+        const data = await resp.json();
+        if (!data.configured) {
+          return { status: 'non_configure', message: data.note, search_url: `https://www.legifrance.gouv.fr/search/#all?query=${encodeURIComponent(query)}&fond=${fond}` };
+        }
+        const results = (data.results || []).slice(0, pageSize || 5).map(r => {
+          // Legifrance search returns results with extracts
+          const items = [];
+          if (r.titles) {
+            for (const t of r.titles.slice(0, 3)) {
+              if (r.sections) {
+                for (const s of r.sections.slice(0, 2)) {
+                  for (const e of (s.extracts || []).slice(0, 2)) {
+                    items.push(formatLegiResult({ ...e, titre: t.title }, fond));
+                  }
+                }
+              } else {
+                items.push({ num: '', title: t.title, id: t.id, excerpt: '', url: legifranceUrl(t.id, fond) });
+              }
+            }
+          }
+          return items;
+        }).flat().slice(0, 8);
+        return {
+          status: 'ok',
+          fond,
+          query,
+          total: data.totalResultNumber || 0,
+          results,
+          search_url: `https://www.legifrance.gouv.fr/search/#all?query=${encodeURIComponent(query)}&fond=${fond}`
+        };
+      } catch (e) {
+        return { status: 'erreur', message: e.message };
+      }
+    }
+
+    if (name === 'obtenir_article') {
+      const { id } = input;
+      addMessage('system', `📄 Récupération article ${id}…`);
+      try {
+        const resp = await fetch('/api/legal/article', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        const data = await resp.json();
+        if (data.error) return { status: 'erreur', message: data.error };
+        const article = data.article || data;
+        return {
+          status: 'ok',
+          id,
+          num: article.num || '',
+          title: article.title || article.titre || '',
+          text: (article.content || article.texte || article.text || '').replace(/<[^>]+>/g, '').slice(0, 3000),
+          dateDebut: article.dateDebut || '',
+          url: legifranceUrl(id, 'CODE_DATE')
+        };
+      } catch (e) {
+        return { status: 'erreur', message: e.message };
+      }
+    }
+
+    if (name === 'rechercher_boss') {
+      const { query } = input;
+      addMessage('system', `🔎 Recherche BOSS : « ${query} »…`);
+      try {
+        const resp = await fetch('/api/boss/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query })
+        });
+        const data = await resp.json();
+        return {
+          status: 'ok',
+          source: 'BOSS (boss.gouv.fr)',
+          query,
+          results: data.results || [],
+          search_url: data.search_url,
+          note: data.note || ''
+        };
+      } catch (e) {
+        return { status: 'erreur', message: e.message, search_url: `https://boss.gouv.fr/portail/jcms/search?q=${encodeURIComponent(query)}` };
+      }
+    }
+
+    return { status: 'erreur', message: 'Outil inconnu: ' + name };
+  }
 
   // ====== HELPERS ======
   function addMessage(type, content) {
@@ -1126,7 +1316,7 @@ Quand tu recois du contenu juridique a transformer:
       const model = apiModel.value.trim();
       let aiResponse = '';
       if (provider === 'anthropic') {
-        aiResponse = await callAnthropic(key, model, conversationHistory);
+        aiResponse = await callAnthropicWithTools(key, model, conversationHistory);
       } else {
         aiResponse = await callOpenAI(key, model, conversationHistory);
       }
@@ -1203,6 +1393,82 @@ Quand tu recois du contenu juridique a transformer:
     }
     const data = await resp.json();
     return data.content[0].text;
+  }
+
+  // ====== ANTHROPIC TOOL CALLING LOOP ======
+  async function callAnthropicWithTools(key, model, messages) {
+    const msgs = messages.map(m => ({ role: m.role, content: m.content }));
+    const MAX_TOOL_ROUNDS = 6;
+    let rounds = 0;
+
+    while (rounds < MAX_TOOL_ROUNDS) {
+      rounds++;
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': key,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: model || 'claude-sonnet-4-20250514',
+          max_tokens: 16000,
+          system: SYSTEM_PROMPT,
+          tools: LEGAL_TOOLS,
+          tool_choice: { type: 'auto' },
+          messages: msgs
+        })
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error?.message || 'Erreur API Anthropic (' + resp.status + ')');
+      }
+
+      const data = await resp.json();
+
+      if (data.stop_reason !== 'tool_use') {
+        // Final response — extract text
+        const textBlock = data.content.find(c => c.type === 'text');
+        return textBlock ? textBlock.text : '';
+      }
+
+      // There are tool calls — add assistant turn and execute
+      msgs.push({ role: 'assistant', content: data.content });
+
+      const toolResults = [];
+      for (const block of data.content) {
+        if (block.type !== 'tool_use') continue;
+        const result = await executeTool(block.name, block.input);
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: block.id,
+          content: JSON.stringify(result, null, 2)
+        });
+      }
+      msgs.push({ role: 'user', content: toolResults });
+    }
+
+    // Safety: if loop exhausted, make a final call without tools
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: model || 'claude-sonnet-4-20250514',
+        max_tokens: 16000,
+        system: SYSTEM_PROMPT,
+        messages: msgs
+      })
+    });
+    if (!resp.ok) throw new Error('Erreur API Anthropic (' + resp.status + ')');
+    const data = await resp.json();
+    return data.content[0]?.text || '';
   }
 
   async function callOpenAI(key, model, messages) {
@@ -1406,14 +1672,11 @@ IMPORTANT: Si tu corriges, renvoie l'INTEGRALITE du HTML corrige, pas juste les 
     return null;
   }
 
-  // Default API key (obfuscated)
-  const DEFAULT_KEY = atob('c2stYW50LWFwaTAzLUI4ZUpfX0x2ak' + '1hNk55azljQ21HQnViWWI4djczWVBP' + 'cFRROFJ3TkFCSzZiTkpQLXhBd2QzSF' + 'REcWM4d21xblFEQnh1Wm5FMVBqUTM2' + 'Z0ZmMkMwdmhRLTBxLXBrd0FB');
-
-  // Load saved config or use defaults
+  // Load saved config
   const savedKey = loadConfig('chatld_key');
   const savedProv = loadConfig('chatld_prov');
   const savedMod = loadConfig('chatld_mod');
-  apiKey.value = savedKey || DEFAULT_KEY;
+  apiKey.value = savedKey || '';
   if (savedProv) apiProvider.value = savedProv;
   if (savedMod) apiModel.value = savedMod;
 
