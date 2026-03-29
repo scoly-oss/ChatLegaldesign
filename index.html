@@ -4,53 +4,59 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chat LegalDesign — Générateur d'infographies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <style>
-    /* ====== DAIRIA TOOLKIT CSS V2 (corrigé) ====== */
+    /* ====== DAIRIA TOOLKIT CSS V3 — Charte DAIRIA ====== */
     :root{
-      --ink:#000000;
-      --blue:#1d617a;
-      --orange:#ff914d;
+      --ink:#1e2d3d;
+      --blue:#1e2d3d;
+      --navy:#1e2d3d;
+      --orange:#e8842c;
       --sand:#e9d3bb;
+      --gray:#6b7280;
       --green:#2f9e44;
       --red:#e03131;
-      --page-bg:#eef0f3;
+      --page-bg:#f8f8f6;
+      --panel-bg:#ffffff;
       --paper:#ffffff;
       --a4-w:794px;
       --a4-h:1123px;
       --pad-x:46px;
       --pad-y:42px;
       --pad-bottom:70px;
-      --shadow:0 14px 40px rgba(0,0,0,.10);
-      --font:"Trebuchet MS", Trebuchet, Arial, sans-serif;
-      --body:11pt;
-      --quote:11pt;
-      --ref:9pt;
-      --lh:1.35;
+      --shadow:0 8px 32px rgba(30,45,61,.10);
+      --font:"Inter","Trebuchet MS", Trebuchet, Arial, sans-serif;
+      --body:11.5pt;
+      --quote:11.5pt;
+      --ref:9.5pt;
+      --lh:1.45;
       --ls:0px;
-      --h1:16pt;
-      --h2:14pt;
-      --h3:12pt;
-      --h4:11pt;
+      --h1:17pt;
+      --h2:14.5pt;
+      --h3:12.5pt;
+      --h4:11.5pt;
       --h1-lh:1.25;
       --h2-lh:1.25;
       --h3-lh:1.2;
       --h4-lh:1.2;
-      --r-card:20px;
+      --r-card:14px;
       --r-pill:999px;
-      --soft-border:rgba(0,0,0,.08);
+      --soft-border:rgba(30,45,61,.08);
       --soft-bg-1:#ffffff;
-      --soft-bg-2:#fbfcfe;
+      --soft-bg-2:#f8f8f6;
       --u-w:650px;
       --u-shift:40px;
       --para-before:8px;
       --para-after:10px;
     }
     *{box-sizing:border-box;}
-    html,body{height:100%;margin:0;font-family:var(--font);font-size:var(--body);line-height:var(--lh);color:var(--ink);background:#1a1d23;}
+    html,body{height:100%;margin:0;font-family:var(--font);font-size:var(--body);line-height:var(--lh);color:var(--ink);background:var(--page-bg);}
 
     /* ====== APP LAYOUT ====== */
     .app-layout{
@@ -75,71 +81,71 @@
       .app-layout>.preview-panel.panel-hidden{display:none;}
       .mobile-toggle{
         display:flex;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-        z-index:100;background:var(--blue);color:#fff;border:none;border-radius:999px;
+        z-index:100;background:var(--navy);color:#fff;border:none;border-radius:999px;
         padding:12px 24px;font-size:14px;font-weight:800;font-family:inherit;
-        cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.35);gap:8px;align-items:center;
+        cursor:pointer;box-shadow:0 6px 24px rgba(30,45,61,.35);gap:8px;align-items:center;
         min-height:48px;
       }
-      .mobile-toggle:hover{background:#2a7a9a;}
+      .mobile-toggle:hover{background:#2a3d52;}
       .mobile-toggle svg{width:20px;height:20px;flex-shrink:0;}
     }
 
     /* ====== CHAT PANEL ====== */
     .chat-panel{
-      display:flex;flex-direction:column;background:#22252b;
-      border-right:1px solid rgba(255,255,255,.08);overflow:hidden;
+      display:flex;flex-direction:column;background:var(--panel-bg);
+      border-right:1px solid rgba(30,45,61,.10);overflow:hidden;
     }
     .chat-header{
-      padding:16px 20px;background:linear-gradient(135deg,#1d617a,#2a7a9a);
+      padding:16px 20px;background:var(--navy);
       display:flex;align-items:center;gap:12px;flex-shrink:0;
     }
     .chat-header svg{width:36px;height:36px;}
-    .chat-header h1{font-size:16px;font-weight:800;color:#fff;margin:0;}
-    .chat-header p{font-size:11px;color:rgba(255,255,255,.7);margin:2px 0 0;}
+    .chat-header h1{font-size:17px;font-weight:800;color:#fff;margin:0;letter-spacing:-.01em;}
+    .chat-header p{font-size:12px;color:rgba(255,255,255,.65);margin:2px 0 0;font-weight:500;}
     .chat-config{
-      padding:10px 16px;background:rgba(255,255,255,.04);
-      border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;
+      padding:10px 16px;background:#f8f8f6;
+      border-bottom:1px solid rgba(30,45,61,.08);flex-shrink:0;
     }
     .chat-config details{margin:0;}
-    .chat-config summary{font-size:12px;font-weight:700;color:rgba(255,255,255,.6);cursor:pointer;padding:4px 0;user-select:none;}
+    .chat-config summary{font-size:12px;font-weight:700;color:var(--gray);cursor:pointer;padding:4px 0;user-select:none;}
     .chat-config .config-body{padding:8px 0 4px;display:flex;flex-direction:column;gap:8px;}
-    .chat-config label{font-size:11px;color:rgba(255,255,255,.5);display:block;margin-bottom:3px;}
+    .chat-config label{font-size:11px;color:var(--gray);display:block;margin-bottom:3px;font-weight:600;}
     .chat-config input,.chat-config select{
-      width:100%;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.06);color:#fff;font-size:12px;font-family:inherit;
+      width:100%;padding:8px 12px;border-radius:8px;border:1.5px solid rgba(30,45,61,.14);
+      background:#fff;color:var(--navy);font-size:13px;font-family:inherit;
     }
     .chat-config input:focus,.chat-config select:focus{outline:none;border-color:var(--orange);}
-    .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+    .chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f8f8f6;}
     .chat-messages::-webkit-scrollbar{width:6px;}
     .chat-messages::-webkit-scrollbar-track{background:transparent;}
-    .chat-messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px;}
-    .msg{max-width:92%;padding:12px 16px;border-radius:16px;font-size:13px;line-height:1.45;word-wrap:break-word;}
-    .msg-user{align-self:flex-end;background:var(--blue);color:#fff;border-bottom-right-radius:4px;}
-    .msg-ai{align-self:flex-start;background:rgba(255,255,255,.08);color:rgba(255,255,255,.9);border-bottom-left-radius:4px;}
-    .msg-system{align-self:center;background:rgba(255,145,77,.12);color:var(--orange);font-size:11px;font-weight:700;padding:8px 14px;border-radius:99px;}
-    .msg-ai pre{background:rgba(0,0,0,.3);padding:10px;border-radius:8px;overflow-x:auto;font-size:11px;white-space:pre-wrap;margin:8px 0 0;}
-    .msg-file{align-self:flex-end;background:rgba(255,145,77,.15);color:var(--orange);border-bottom-right-radius:4px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;}
+    .chat-messages::-webkit-scrollbar-thumb{background:rgba(30,45,61,.15);border-radius:3px;}
+    .msg{max-width:92%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;word-wrap:break-word;}
+    .msg-user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px;}
+    .msg-ai{align-self:flex-start;background:#fff;color:var(--navy);border-bottom-left-radius:4px;border:1px solid rgba(30,45,61,.08);box-shadow:0 1px 4px rgba(30,45,61,.06);}
+    .msg-system{align-self:center;background:rgba(232,132,44,.12);color:var(--orange);font-size:12px;font-weight:700;padding:8px 14px;border-radius:99px;}
+    .msg-ai pre{background:rgba(30,45,61,.05);color:var(--navy);padding:10px;border-radius:8px;overflow-x:auto;font-size:11px;white-space:pre-wrap;margin:8px 0 0;}
+    .msg-file{align-self:flex-end;background:rgba(232,132,44,.12);color:var(--orange);border-bottom-right-radius:4px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;}
     .msg-file svg{flex-shrink:0;}
-    .chat-input-area{padding:12px 16px;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+    .chat-input-area{padding:12px 16px;background:#fff;border-top:1px solid rgba(30,45,61,.08);flex-shrink:0;}
     .chat-input-row{display:flex;gap:8px;align-items:flex-end;}
     .chat-input-row textarea{
       flex:1;resize:none;padding:10px 14px;border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);
-      color:#fff;font-size:13px;font-family:inherit;min-height:44px;max-height:160px;line-height:1.4;
+      border:1.5px solid rgba(30,45,61,.14);background:#f8f8f6;
+      color:var(--navy);font-size:14px;font-family:inherit;min-height:44px;max-height:160px;line-height:1.5;
     }
-    .chat-input-row textarea:focus{outline:none;border-color:var(--blue);}
-    .chat-input-row textarea::placeholder{color:rgba(255,255,255,.3);}
+    .chat-input-row textarea:focus{outline:none;border-color:var(--orange);background:#fff;}
+    .chat-input-row textarea::placeholder{color:var(--gray);}
     .chat-btn{width:42px;height:42px;border-radius:12px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
-    .chat-btn-send{background:var(--blue);color:#fff;}
-    .chat-btn-send:hover{background:#2a7a9a;}
-    .chat-btn-send:disabled{opacity:.4;cursor:not-allowed;}
-    .chat-btn-file{background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);}
-    .chat-btn-file:hover{background:rgba(255,255,255,.14);color:#fff;}
+    .chat-btn-send{background:var(--orange);color:#fff;}
+    .chat-btn-send:hover{background:#d4731f;transform:translateY(-1px);box-shadow:0 4px 12px rgba(232,132,44,.35);}
+    .chat-btn-send:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+    .chat-btn-file{background:rgba(30,45,61,.07);color:var(--gray);}
+    .chat-btn-file:hover{background:rgba(30,45,61,.12);color:var(--navy);}
     .file-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
-    .file-chip{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:rgba(255,145,77,.15);color:var(--orange);font-size:11px;font-weight:700;}
+    .file-chip{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:rgba(232,132,44,.12);color:var(--orange);font-size:11px;font-weight:700;}
     .file-chip button{background:none;border:none;color:var(--orange);cursor:pointer;font-size:14px;line-height:1;padding:0;}
     .typing-indicator{display:flex;gap:4px;padding:12px 16px;align-self:flex-start;}
-    .typing-indicator span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);animation:typing 1.2s infinite ease-in-out;}
+    .typing-indicator span{width:8px;height:8px;border-radius:50%;background:rgba(30,45,61,.25);animation:typing 1.2s infinite ease-in-out;}
     .typing-indicator span:nth-child(2){animation-delay:.15s;}
     .typing-indicator span:nth-child(3){animation-delay:.3s;}
     @keyframes typing{0%,80%,100%{transform:scale(.7);opacity:.4;}40%{transform:scale(1);opacity:1;}}
@@ -147,30 +153,30 @@
     /* ====== PREVIEW PANEL ====== */
     .preview-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--page-bg);}
     .preview-toolbar{
-      padding:12px 20px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08);
+      padding:12px 20px;background:#fff;border-bottom:1px solid rgba(30,45,61,.08);
       display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;
     }
-    .preview-toolbar h2{font-size:14px;font-weight:800;color:var(--blue);margin:0;flex:1;}
+    .preview-toolbar h2{font-size:14px;font-weight:800;color:var(--navy);margin:0;flex:1;letter-spacing:-.01em;}
     .toolbar-btn{
-      padding:10px 20px;border-radius:12px;border:2px solid rgba(0,0,0,.1);
-      background:#fff;font-size:13px;font-weight:800;cursor:pointer;
+      padding:10px 18px;border-radius:10px;border:1.5px solid rgba(30,45,61,.14);
+      background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:var(--navy);
       transition:all .15s;font-family:inherit;
       display:inline-flex;align-items:center;gap:6px;
     }
-    .toolbar-btn:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.1);}
+    .toolbar-btn:hover{border-color:var(--navy);color:var(--navy);transform:translateY(-1px);box-shadow:0 4px 12px rgba(30,45,61,.10);}
     .toolbar-btn:active{transform:translateY(0);}
-    .toolbar-btn-primary{background:var(--blue);color:#fff;border-color:var(--blue);}
-    .toolbar-btn-primary:hover{background:#2a7a9a;border-color:#2a7a9a;color:#fff;}
-    .toolbar-btn-orange{background:var(--orange);color:#111;border-color:var(--orange);}
-    .toolbar-btn-orange:hover{background:#ff7a2e;border-color:#ff7a2e;color:#111;}
+    .toolbar-btn-primary{background:var(--navy);color:#fff;border-color:var(--navy);}
+    .toolbar-btn-primary:hover{background:#2a3d52;border-color:#2a3d52;color:#fff;}
+    .toolbar-btn-orange{background:var(--orange);color:#fff;border-color:var(--orange);}
+    .toolbar-btn-orange:hover{background:#d4731f;border-color:#d4731f;color:#fff;}
     .preview-scroll{flex:1;overflow:auto;padding:24px;display:flex;flex-direction:column;align-items:center;gap:24px;}
     .preview-scroll::-webkit-scrollbar{width:8px;}
     .preview-scroll::-webkit-scrollbar-track{background:transparent;}
-    .preview-scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;}
-    .preview-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(0,0,0,.35);text-align:center;padding:40px;}
+    .preview-scroll::-webkit-scrollbar-thumb{background:rgba(30,45,61,.15);border-radius:4px;}
+    .preview-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gray);text-align:center;padding:40px;}
     .preview-empty svg{width:80px;height:80px;margin-bottom:16px;opacity:.3;}
-    .preview-empty h3{font-size:18px;font-weight:800;margin:0 0 8px;}
-    .preview-empty p{font-size:13px;max-width:320px;line-height:1.5;}
+    .preview-empty h3{font-size:18px;font-weight:800;margin:0 0 8px;color:var(--navy);}
+    .preview-empty p{font-size:14px;max-width:320px;line-height:1.5;color:var(--gray);}
 
     /* ====== A4 SHEETS ====== */
     .sheet{
@@ -199,7 +205,7 @@
     .logo-header{
       display:flex;align-items:center;gap:16px;
       margin-bottom:28px;padding-bottom:18px;
-      border-bottom:3px solid var(--blue);
+      border-bottom:3px solid var(--navy);
     }
     .logo-header svg{width:160px;height:auto;flex-shrink:0;}
     .logo-header__right{
@@ -262,7 +268,7 @@
     .underlines{margin-top:8px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;}
     .u-orange{height:5px;width:var(--u-w);max-width:100%;background:var(--orange);border-radius:3px;}
     .u-blue{height:5px;width:var(--u-w);max-width:100%;background:var(--blue);margin-left:var(--u-shift);border-radius:3px;}
-    .ref-mark{position:absolute;right:0;bottom:-2px;width:56px;height:4px;border-radius:999px;background:linear-gradient(90deg,rgba(255,145,77,.15),var(--orange));pointer-events:none;opacity:.9;}
+    .ref-mark{position:absolute;right:0;bottom:-2px;width:56px;height:4px;border-radius:999px;background:linear-gradient(90deg,rgba(232,132,44,.15),var(--orange));pointer-events:none;opacity:.9;}
 
     /* ====== TITLE BLOCKS ====== */
     .title-main{position:relative;padding:0 0 0 88px;font-size:var(--h1);}
@@ -304,22 +310,22 @@
     .bodyrule{height:3px;width:360px;background:var(--blue);margin:10px 0 0;border-radius:3px;}
 
     .body-frame{
-      border-radius:18px;padding:14px 16px;display:flex;align-items:flex-start;
-      background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,var(--blue),var(--orange)) border-box;
+      border-radius:var(--r-card);padding:14px 16px;display:flex;align-items:flex-start;
+      background:linear-gradient(#fff,#fff) padding-box,linear-gradient(90deg,var(--navy),var(--orange)) border-box;
       border:2px solid transparent;
     }
     .body-frame>p{width:100%;line-height:var(--lh);}
 
     .extra-box{
-      border-radius:20px;border-left:7px solid var(--orange);
-      background:rgba(255,145,77,0.08);padding:16px 20px;
+      border-radius:var(--r-card);border-left:6px solid var(--orange);
+      background:rgba(232,132,44,0.07);padding:16px 20px;
       font-size:var(--body);line-height:var(--lh);color:var(--ink);
-      box-shadow:0 8px 20px rgba(0,0,0,0.06);
+      box-shadow:0 4px 14px rgba(30,45,61,0.05);
       overflow:visible;
     }
-    .extra-box--blue{border-left-color:var(--blue);background:rgba(29,97,122,0.06);}
+    .extra-box--blue{border-left-color:var(--navy);background:rgba(30,45,61,0.05);}
     .extra-box--sand{border-left-color:var(--sand);background:rgba(233,211,187,0.20);}
-    .extra-box--green{border-left-color:var(--green);background:rgba(47,158,68,0.08);}
+    .extra-box--green{border-left-color:var(--green);background:rgba(47,158,68,0.07);}
     .extra-box--red{border-left-color:var(--red);background:rgba(224,49,49,0.06);}
     .extra-box p{line-height:var(--lh);}
 
@@ -350,7 +356,7 @@
     }
     .op-circle--ghost{background:#fff;border:2px solid rgba(0,0,0,.30);color:rgba(0,0,0,.60);font-size:13px;}
 
-    .frame{border-radius:var(--r-card);border:4px solid var(--blue);padding:14px 16px;background:#fff;}
+    .frame{border-radius:var(--r-card);border:3px solid var(--navy);padding:14px 16px;background:#fff;}
     .frame--orange{border-color:var(--orange);}
     .frame--sand{border-color:var(--sand);}
 
@@ -372,8 +378,8 @@
       align-items:center;justify-content:center;border:2px solid rgba(0,0,0,.08);
       background:#fff;flex:0 0 auto;
     }
-    .emo-chip--blue{border-color:rgba(29,97,122,.25);}
-    .emo-chip--orange{border-color:rgba(255,145,77,.35);}
+    .emo-chip--blue{border-color:rgba(30,45,61,.25);}
+    .emo-chip--orange{border-color:rgba(232,132,44,.35);}
     .emoji-char{
       font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;
       line-height:1;display:inline-flex;align-items:center;justify-content:center;font-size:14px;
@@ -424,7 +430,7 @@
     /* ====== TIMELINE VERTICAL ====== */
     .timeline-v{display:grid;gap:12px;}
     .timeline-v__item{display:grid;grid-template-columns:18px 1fr;gap:10px;align-items:start;position:relative;}
-    .timeline-v__item::before{content:"";position:absolute;left:7px;top:18px;bottom:-12px;width:3px;background:rgba(29,97,122,.16);border-radius:999px;}
+    .timeline-v__item::before{content:"";position:absolute;left:7px;top:18px;bottom:-12px;width:3px;background:rgba(30,45,61,.16);border-radius:999px;}
     .timeline-v__item:last-child::before{display:none;}
     .timeline-v__dot{width:18px;height:18px;border-radius:999px;border:4px solid var(--blue);background:#fff;margin-top:2px;flex-shrink:0;}
     .timeline-v__dot--orange{border-color:var(--orange);}
@@ -437,7 +443,7 @@
       position:relative;display:grid;grid-template-columns:repeat(4,1fr);
       gap:12px;padding-top:10px;
     }
-    .timeline-h::before{content:"";position:absolute;left:7px;right:7px;top:18px;height:5px;background:rgba(29,97,122,.16);border-radius:999px;}
+    .timeline-h::before{content:"";position:absolute;left:7px;right:7px;top:18px;height:5px;background:rgba(30,45,61,.16);border-radius:999px;}
     .timeline-h__item{position:relative;min-width:0;text-align:center;}
     .timeline-h__dot{width:18px;height:18px;border-radius:999px;border:4px solid var(--blue);background:#fff;margin:0 auto;position:relative;z-index:1;}
     .timeline-h__dot--orange{border-color:var(--orange);}
@@ -518,12 +524,12 @@
     }
 
     /* ====== LOADING OVERLAY ====== */
-    .gen-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;}
+    .gen-overlay{position:fixed;inset:0;background:rgba(30,45,61,.55);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);}
     .gen-overlay[hidden]{display:none;}
-    .gen-box{background:#fff;border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);}
-    .gen-box h3{font-size:16px;color:var(--blue);margin:0 0 12px;}
-    .gen-box p{font-size:13px;color:rgba(0,0,0,.6);margin:0;}
-    .gen-spinner{width:40px;height:40px;border:4px solid rgba(29,97,122,.2);border-top-color:var(--blue);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;}
+    .gen-box{background:#fff;border-radius:20px;padding:32px 40px;text-align:center;box-shadow:0 20px 60px rgba(30,45,61,.25);}
+    .gen-box h3{font-size:17px;color:var(--navy);margin:0 0 12px;font-weight:800;}
+    .gen-box p{font-size:14px;color:var(--gray);margin:0;}
+    .gen-spinner{width:40px;height:40px;border:4px solid rgba(232,132,44,.2);border-top-color:var(--orange);border-radius:50%;margin:0 auto 16px;animation:spin 1s linear infinite;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
     /* ====== MOBILE TOGGLE — hidden by default on desktop ====== */
@@ -726,7 +732,7 @@
     <!-- CHAT PANEL -->
     <div class="chat-panel">
       <div class="chat-header">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="#fff" stroke="#1d617a" stroke-width="8"/><line x1="52" y1="42" x2="52" y2="138" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="58" r="10" fill="#ff914d"/><circle cx="52" cy="90" r="10" fill="#fff" stroke="#1d617a" stroke-width="6"/><circle cx="52" cy="122" r="10" fill="#fff" stroke="#1d617a" stroke-width="6"/><line x1="78" y1="60" x2="140" y2="60" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/><line x1="78" y1="92" x2="150" y2="92" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity=".9"/><line x1="78" y1="124" x2="132" y2="124" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity=".75"/><line x1="78" y1="150" x2="150" y2="150" stroke="#ff914d" stroke-width="10" stroke-linecap="round"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="36" fill="#fff" stroke="#1e2d3d" stroke-width="8"/><line x1="52" y1="42" x2="52" y2="138" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/><circle cx="52" cy="58" r="10" fill="#e8842c"/><circle cx="52" cy="90" r="10" fill="#fff" stroke="#1e2d3d" stroke-width="6"/><circle cx="52" cy="122" r="10" fill="#fff" stroke="#1e2d3d" stroke-width="6"/><line x1="78" y1="60" x2="140" y2="60" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/><line x1="78" y1="92" x2="150" y2="92" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity=".9"/><line x1="78" y1="124" x2="132" y2="124" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity=".75"/><line x1="78" y1="150" x2="150" y2="150" stroke="#e8842c" stroke-width="10" stroke-linecap="round"/></svg>
         <div>
           <h1>Chat LegalDesign</h1>
           <p>Générateur d'infographies juridiques</p>
@@ -788,7 +794,7 @@
       </div>
       <div class="preview-scroll" id="preview-scroll">
         <div class="preview-empty" id="preview-empty">
-          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="10" width="70" height="80" rx="6" stroke="#1d617a" stroke-width="3"/><line x1="30" y1="30" x2="70" y2="30" stroke="#1d617a" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="42" x2="60" y2="42" stroke="#ff914d" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="54" x2="65" y2="54" stroke="#1d617a" stroke-width="2" stroke-linecap="round" opacity=".5"/><line x1="30" y1="62" x2="55" y2="62" stroke="#1d617a" stroke-width="2" stroke-linecap="round" opacity=".5"/><line x1="30" y1="74" x2="70" y2="74" stroke="#e9d3bb" stroke-width="3" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="10" width="70" height="80" rx="6" stroke="#1e2d3d" stroke-width="3"/><line x1="30" y1="30" x2="70" y2="30" stroke="#1e2d3d" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="42" x2="60" y2="42" stroke="#e8842c" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="54" x2="65" y2="54" stroke="#1e2d3d" stroke-width="2" stroke-linecap="round" opacity=".5"/><line x1="30" y1="62" x2="55" y2="62" stroke="#1e2d3d" stroke-width="2" stroke-linecap="round" opacity=".5"/><line x1="30" y1="74" x2="70" y2="74" stroke="#e9d3bb" stroke-width="3" stroke-linecap="round"/></svg>
           <h3>Aucune infographie</h3>
           <p>Decrivez ce que vous souhaitez dans le chat ou chargez un document pour commencer.</p>
         </div>
@@ -837,20 +843,20 @@
   // ====== LOGO SVG (Dairia) ======
   const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 240" role="img" style="width:220px;height:auto;">
     <g transform="translate(30,30)">
-      <rect x="0" y="0" width="180" height="180" rx="36" fill="#ffffff" stroke="#1d617a" stroke-width="8"/>
-      <line x1="52" y1="42" x2="52" y2="138" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/>
-      <circle cx="52" cy="58" r="10" fill="#ff914d"/>
-      <circle cx="52" cy="90" r="10" fill="#ffffff" stroke="#1d617a" stroke-width="6"/>
-      <circle cx="52" cy="122" r="10" fill="#ffffff" stroke="#1d617a" stroke-width="6"/>
-      <line x1="78" y1="60" x2="140" y2="60" stroke="#1d617a" stroke-width="10" stroke-linecap="round"/>
-      <line x1="78" y1="92" x2="150" y2="92" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
-      <line x1="78" y1="124" x2="132" y2="124" stroke="#1d617a" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
-      <line x1="78" y1="150" x2="150" y2="150" stroke="#ff914d" stroke-width="10" stroke-linecap="round"/>
+      <rect x="0" y="0" width="180" height="180" rx="36" fill="#ffffff" stroke="#1e2d3d" stroke-width="8"/>
+      <line x1="52" y1="42" x2="52" y2="138" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/>
+      <circle cx="52" cy="58" r="10" fill="#e8842c"/>
+      <circle cx="52" cy="90" r="10" fill="#ffffff" stroke="#1e2d3d" stroke-width="6"/>
+      <circle cx="52" cy="122" r="10" fill="#ffffff" stroke="#1e2d3d" stroke-width="6"/>
+      <line x1="78" y1="60" x2="140" y2="60" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round"/>
+      <line x1="78" y1="92" x2="150" y2="92" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+      <line x1="78" y1="124" x2="132" y2="124" stroke="#1e2d3d" stroke-width="10" stroke-linecap="round" opacity="0.75"/>
+      <line x1="78" y1="150" x2="150" y2="150" stroke="#e8842c" stroke-width="10" stroke-linecap="round"/>
     </g>
     <g transform="translate(250,92)">
-      <text x="0" y="0" font-size="56" font-weight="750" fill="#1d617a" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">Dairia</text>
-      <text x="210" y="0" font-size="56" font-weight="750" fill="#ff914d" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">legaldesign</text>
-      <text x="0" y="50" font-size="22" font-weight="550" fill="#1d617a" opacity="0.65" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">infographies juridiques</text>
+      <text x="0" y="0" font-size="56" font-weight="750" fill="#1e2d3d" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">Dairia</text>
+      <text x="210" y="0" font-size="56" font-weight="750" fill="#e8842c" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">legaldesign</text>
+      <text x="0" y="50" font-size="22" font-weight="550" fill="#1e2d3d" opacity="0.65" font-family="Avenir Next, Avenir, Segoe UI, Roboto, Arial, sans-serif">infographies juridiques</text>
     </g>
   </svg>`;
 
@@ -1226,7 +1232,7 @@ Quand tu recois du contenu juridique a transformer:
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
       .replace(/\*(.*?)\*/g, '<i>$1</i>')
-      .replace(/`(.*?)`/g, '<code style="background:rgba(0,0,0,.2);padding:1px 4px;border-radius:4px;">$1</code>')
+      .replace(/`(.*?)`/g, '<code style="background:rgba(30,45,61,.08);color:#1e2d3d;padding:1px 4px;border-radius:4px;font-family:monospace;">$1</code>')
       .replace(/\n/g, '<br>');
   }
 
