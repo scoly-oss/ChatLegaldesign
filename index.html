@@ -3,11 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Security: Content-Security-Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src https://api.anthropic.com https://api.openai.com; img-src 'self' data: blob:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
   <title>Chat LegalDesign — Générateur d'infographies</title>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <!-- Security: DOMPurify for HTML sanitization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js" crossorigin="anonymous"></script>
   <style>
     /* ====== DAIRIA TOOLKIT CSS V2 (corrigé) ====== */
     :root{
@@ -997,6 +1004,13 @@ Quand tu recois du contenu juridique a transformer:
 - Francais.`;
 
   // ====== HELPERS ======
+  // Security: HTML escape to prevent XSS
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(str));
+    return d.innerHTML;
+  }
+
   function addMessage(type, content) {
     const div = document.createElement('div');
     div.className = 'msg msg-' + type;
@@ -1008,7 +1022,9 @@ Quand tu recois du contenu juridique a transformer:
   function addFileMessage(name) {
     const div = document.createElement('div');
     div.className = 'msg msg-file';
-    div.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> ' + name;
+    // Security: escape filename to prevent XSS
+    const safeName = escapeHtml(name);
+    div.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> ' + safeName;
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
@@ -1077,7 +1093,8 @@ Quand tu recois du contenu juridique a transformer:
       uploadedFiles.push({name: file.name, content: text.substring(0, 50000)});
       const chip = document.createElement('div');
       chip.className = 'file-chip';
-      chip.innerHTML = file.name + ' <button onclick="this.parentElement.remove()">&times;</button>';
+      // Security: escape filename to prevent XSS
+      chip.innerHTML = escapeHtml(file.name) + ' <button onclick="this.parentElement.remove()">&times;</button>';
       fileChips.appendChild(chip);
     }
     fileInput.value = '';
@@ -1095,6 +1112,19 @@ Quand tu recois du contenu juridique a transformer:
   });
   btnSend.addEventListener('click', sendMessage);
 
+  // ====== RATE LIMITING ======
+  // Security: prevent API abuse — max 10 requests per minute
+  const _rateLimitWindow = 60000;
+  const _rateLimitMax = 10;
+  let _rateLimitTimestamps = [];
+  function isRateLimited() {
+    const now = Date.now();
+    _rateLimitTimestamps = _rateLimitTimestamps.filter(function(t) { return now - t < _rateLimitWindow; });
+    if (_rateLimitTimestamps.length >= _rateLimitMax) return true;
+    _rateLimitTimestamps.push(now);
+    return false;
+  }
+
   // ====== SEND MESSAGE ======
   async function sendMessage() {
     const text = chatInput.value.trim();
@@ -1103,6 +1133,21 @@ Quand tu recois du contenu juridique a transformer:
     const key = apiKey.value.trim();
     if (!key) {
       addMessage('system', 'Veuillez configurer votre cle API dans Configuration');
+      return;
+    }
+    // Security: basic API key format validation
+    const provider = apiProvider.value;
+    if (provider === 'anthropic' && !key.startsWith('sk-ant-')) {
+      addMessage('system', 'Cle API Anthropic invalide (doit commencer par sk-ant-)');
+      return;
+    }
+    if (provider === 'openai' && !key.startsWith('sk-')) {
+      addMessage('system', 'Cle API OpenAI invalide (doit commencer par sk-)');
+      return;
+    }
+    // Security: rate limiting
+    if (isRateLimited()) {
+      addMessage('system', 'Trop de requetes — veuillez patienter avant d\'envoyer un nouveau message.');
       return;
     }
     let userContent = text;
@@ -1122,7 +1167,6 @@ Quand tu recois du contenu juridique a transformer:
     btnSend.disabled = true;
     showTyping();
     try {
-      const provider = apiProvider.value;
       const model = apiModel.value.trim();
       let aiResponse = '';
       if (provider === 'anthropic') {
@@ -1248,7 +1292,16 @@ IMPORTANT: Si tu corriges, renvoie l'INTEGRALITE du HTML corrige, pas juste les 
 
   // ====== RENDER ======
   function renderInfographic(html) {
-    pagesRoot.innerHTML = html;
+    // Security: sanitize AI-generated HTML to prevent XSS while preserving styles
+    const clean = (typeof DOMPurify !== 'undefined')
+      ? DOMPurify.sanitize(html, {
+          ADD_TAGS: ['style'],
+          ADD_ATTR: ['style', 'class', 'id', 'data-page'],
+          FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'meta', 'link'],
+          FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur', 'onchange', 'onsubmit', 'onkeydown', 'onkeyup', 'onkeypress']
+        })
+      : html;
+    pagesRoot.innerHTML = clean;
     // Add page numbers if missing
     const sheets = pagesRoot.querySelectorAll('.sheet');
     sheets.forEach((sheet, i) => {
@@ -1406,8 +1459,8 @@ IMPORTANT: Si tu corriges, renvoie l'INTEGRALITE du HTML corrige, pas juste les 
     return null;
   }
 
-  // Default API key (obfuscated)
-  const DEFAULT_KEY = atob('c2stYW50LWFwaTAzLUI4ZUpfX0x2ak' + '1hNk55azljQ21HQnViWWI4djczWVBP' + 'cFRROFJ3TkFCSzZiTkpQLXhBd2QzSF' + 'REcWM4d21xblFEQnh1Wm5FMVBqUTM2' + 'Z0ZmMkMwdmhRLTBxLXBrd0FB');
+  // Security: no default API key — user must provide their own
+  const DEFAULT_KEY = '';
 
   // Load saved config or use defaults
   const savedKey = loadConfig('chatld_key');
