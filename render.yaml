@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: dairia-legal-chat
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: https://noqzwkkdfpbmglewsozo.supabase.co
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
